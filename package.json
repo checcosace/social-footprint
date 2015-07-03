@@ -1,0 +1,16 @@
+{
+  "name": "social-footprint",
+  "version": "1.0.0",
+  "description": "Progetto di Sistemi Complessi",
+  "main": "BrokerAgent.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Crippa Francesco",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.0",
+    "url": "^0.10.3",
+    "x-ray": "^2.0.1"
+  }
+}

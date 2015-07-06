@@ -1,0 +1,4 @@
+<resource_agents>
+  <resource_agent>FacebookAgent.js</resource_agent>
+  <resource_agent>TwitterAgent.js</resource_agent>
+</resource_agents>

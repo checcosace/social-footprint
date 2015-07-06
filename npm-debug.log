@@ -1,20 +1,93 @@
 0 info it worked if it ends with ok
-1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', '--save', 'x-ray' ]
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', '--save', 'reqe' ]
 2 info using npm@1.4.28
 3 info using node@v0.10.36
-4 error Failed to parse json
-4 error Unexpected end of input
-5 error File: /Users/Checco/Desktop/Articoli Progetto SC/Progetto/social-footprint/package.json
-6 error Failed to parse package.json data.
-6 error package.json must be actual JSON, not just JavaScript.
-6 error
-6 error This is not a bug in npm.
-6 error Tell the package author to fix their package.json file. JSON.parse
-7 error System Darwin 14.4.0
-8 error command "node" "/usr/local/bin/npm" "install" "--save" "x-ray"
-9 error cwd /Users/Checco/Desktop/Articoli Progetto SC/Progetto/social-footprint
-10 error node -v v0.10.36
-11 error npm -v 1.4.28
-12 error file /Users/Checco/Desktop/Articoli Progetto SC/Progetto/social-footprint/package.json
-13 error code EJSONPARSE
-14 verbose exit [ 1, true ]
+4 warn package.json social-footprint@1.0.0 No repository field.
+5 warn package.json social-footprint@1.0.0 No README data
+6 warn package.json fs@0.0.2 fs is also the name of a node core module.
+7 warn package.json fs@0.0.2 No description
+8 warn package.json fs@0.0.2 No repository field.
+9 warn package.json fs@0.0.2 No README data
+10 warn package.json http@0.0.0 http is also the name of a node core module.
+11 warn package.json http@0.0.0 No description
+12 warn package.json http@0.0.0 No repository field.
+13 warn package.json http@0.0.0 No README data
+14 warn package.json url@0.10.3 url is also the name of a node core module.
+15 verbose readDependencies using package.json deps
+16 verbose cache add [ 'reqe', null ]
+17 verbose cache add name=undefined spec="reqe" args=["reqe",null]
+18 verbose parsed url { protocol: null,
+18 verbose parsed url   slashes: null,
+18 verbose parsed url   auth: null,
+18 verbose parsed url   host: null,
+18 verbose parsed url   port: null,
+18 verbose parsed url   hostname: null,
+18 verbose parsed url   hash: null,
+18 verbose parsed url   search: null,
+18 verbose parsed url   query: null,
+18 verbose parsed url   pathname: 'reqe',
+18 verbose parsed url   path: 'reqe',
+18 verbose parsed url   href: 'reqe' }
+19 silly lockFile 3045a43a-reqe reqe
+20 verbose lock reqe /Users/Checco/.npm/3045a43a-reqe.lock
+21 silly lockFile 3045a43a-reqe reqe
+22 silly lockFile 3045a43a-reqe reqe
+23 verbose addNamed [ 'reqe', '' ]
+24 verbose addNamed [ null, '*' ]
+25 silly lockFile 79547d6d-reqe reqe@
+26 verbose lock reqe@ /Users/Checco/.npm/79547d6d-reqe.lock
+27 silly addNameRange { name: 'reqe', range: '*', hasData: false }
+28 verbose request where is /reqe
+29 verbose request registry https://registry.npmjs.org/
+30 verbose request id 9fb8e83976fb3f4c
+31 verbose url raw /reqe
+32 verbose url resolving [ 'https://registry.npmjs.org/', './reqe' ]
+33 verbose url resolved https://registry.npmjs.org/reqe
+34 verbose request where is https://registry.npmjs.org/reqe
+35 info trying registry request attempt 1 at 12:20:00
+36 http GET https://registry.npmjs.org/reqe
+37 http 404 https://registry.npmjs.org/reqe
+38 verbose headers { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+38 verbose headers   'content-type': 'application/json',
+38 verbose headers   'cache-control': 'max-age=0',
+38 verbose headers   'content-length': '51',
+38 verbose headers   'accept-ranges': 'bytes',
+38 verbose headers   date: 'Mon, 06 Jul 2015 10:20:01 GMT',
+38 verbose headers   via: '1.1 varnish',
+38 verbose headers   age: '0',
+38 verbose headers   connection: 'keep-alive',
+38 verbose headers   'x-served-by': 'cache-ams4145-AMS',
+38 verbose headers   'x-cache': 'MISS',
+38 verbose headers   'x-cache-hits': '0',
+38 verbose headers   'x-timer': 'S1436178001.718938,VS0,VE101' }
+39 silly registry.get cb [ 404,
+39 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+39 silly registry.get     'content-type': 'application/json',
+39 silly registry.get     'cache-control': 'max-age=0',
+39 silly registry.get     'content-length': '51',
+39 silly registry.get     'accept-ranges': 'bytes',
+39 silly registry.get     date: 'Mon, 06 Jul 2015 10:20:01 GMT',
+39 silly registry.get     via: '1.1 varnish',
+39 silly registry.get     age: '0',
+39 silly registry.get     connection: 'keep-alive',
+39 silly registry.get     'x-served-by': 'cache-ams4145-AMS',
+39 silly registry.get     'x-cache': 'MISS',
+39 silly registry.get     'x-cache-hits': '0',
+39 silly registry.get     'x-timer': 'S1436178001.718938,VS0,VE101' } ]
+40 silly lockFile 79547d6d-reqe reqe@
+41 silly lockFile 79547d6d-reqe reqe@
+42 error 404 404 Not Found: reqe
+42 error 404
+42 error 404 'reqe' is not in the npm registry.
+42 error 404 You should bug the author to publish it
+42 error 404 It was specified as a dependency of 'social-footprint'
+42 error 404
+42 error 404 Note that you can also install from a
+42 error 404 tarball, folder, or http url, or git url.
+43 error System Darwin 14.4.0
+44 error command "node" "/usr/local/bin/npm" "install" "--save" "reqe"
+45 error cwd /Users/Checco/Desktop/Articoli Progetto SC/Progetto/social-footprint
+46 error node -v v0.10.36
+47 error npm -v 1.4.28
+48 error code E404
+49 verbose exit [ 1, true ]

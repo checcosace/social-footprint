@@ -4,6 +4,10 @@ var request = require('request')
 var cheerio = require('cheerio')
 var http = require('http')
 var fs = require('fs')
+var async = require('async')
+
+var profilesLinks = []
+var numberCalls=0
 module.exports={
   pullDataFromSource: function (query,callback){
 
@@ -36,10 +40,7 @@ function getRoughFile(query,index) {
     var pattern = '<code class="hidden_elem" id="u_0_7"><!-- '
     start_index = result.indexOf(pattern)+pattern.length
     finish_index = result.lastIndexOf(' --></code>')//('\n<script>bigPipe.beforePageletArrive("pagelet_search_results")</script>\n')
-    console.log(index+':'+start_index)
-    console.log(index+':'+finish_index)
     var file_content = result.substr(start_index,finish_index)
-    //console.log(file_content)
     writeRoughFile(file_content,index)
   })
 }
@@ -51,7 +52,7 @@ function writeRoughFile(file_content,index){
       return console.log(err)
     }
     else{
-      buildUserList()
+      buildUserList('users'+index+'.html')
     }
   })
 }
@@ -59,12 +60,60 @@ function writeRoughFile(file_content,index){
 
 var name = "Crippa Francesco"
 var query = createQuery(name)
-query.map(getRoughFile)
-
-
-function buildUserList(){
-  fs.readFile('users0.html','utf8',function(err,data){
-    $=cheerio.load(data)
-    console.log($('.detailedsearch_result').text())
+var index=0
+async.each(query,
+  function(singleQuery,callback){
+    getRoughFile(singleQuery,index)
+    index++
+    callback()
   })
+
+
+function buildUserList(file){
+  numberCalls++
+  fs.readFile(file,'utf8',function(err,data){
+    $=cheerio.load(data)
+    var counter = $('.instant_search_title a').length
+    $('.instant_search_title a').each(function(i,element){
+      var link = $(this)
+      link = link.attr('href')
+      var profileInfos = $('.fsm div')
+      console.log(profileInfos+"\n")
+      var profileInfo = $(profileInfos[i])
+      console.log(profileInfo.length)
+      scrape=cheerio.load(profileInfo+"\n")
+      // console.log("______________________________________________________")
+      // console.log(link)
+      // console.log(profileInfo)
+      if(profileInfo.length!=0){
+        scrape('.fbProfileBylineLabel a').each(function(k,item){
+          var information = $(this)
+          information = information.text()
+          // console.log(information)
+        })
+      }
+      else{
+        console.log("NO INFORMATION ON THIS ACCOUNT")
+      }
+
+      //console.log("INDEX "+i+": "+profileInfo)
+      if (link.indexOf('/pages/')==-1 && profilesLinks.indexOf(link)==-1){
+        profilesLinks.push(link)
+        if(numberCalls==2 && i==counter-1){
+          getUsersData(profilesLinks)
+        }
+      }
+    })
+  })
+}
+
+function getUsersData(profilesLinks){
+    //async x ogni utente e chiamo scrapeUser
+  async.map(profilesLinks, scrapeUser, function(err, results){
+    console.log("Results: "+results)
+  })
+}
+
+function scrapeUser(userLink,callback){
+  callback(null,userLink)
 }

@@ -15,7 +15,7 @@ module.exports={
   }
 }
 // inizializza e lancia lo scrape
-var name = "Crippa Francesco"
+var name = "Vizzari Giuseppe"
 var query = createQuery(name)
 var index=0
 async.each(query,
@@ -49,9 +49,15 @@ function createQuery(query){
 function getRoughFile(query,index) {
   url = 'http://www.facebook.com/public/'+query
   xray(url, 'body@html')(function(err,result){
-    var pattern = '<code class="hidden_elem" id="u_0_7"><!-- '
-    start_index = result.indexOf(pattern)+pattern.length
-    finish_index = result.lastIndexOf(' --></code>')//('\n<script>bigPipe.beforePageletArrive("pagelet_search_results")</script>\n')
+    var regex1 = /<code class="hidden_elem" id="u_._."><!-- <div><div class="mbm detailedsearch_result">/i
+    var regex2 = /<\/a><\/div><\/div> --><\/code>/i
+    var regex3 = /<code class="hidden_elem" id="u_._."><!-- <div>/i
+    // start_index = result.indexOf(pattern)+pattern.length
+    // finish_index = result.lastIndexOf(' --></code>')//('\n<script>bigPipe.beforePageletArrive("pagelet_search_results")</script>\n')
+    start_index = result.search(regex1) + result.match(regex3)[0].length
+    finish_index = result.search(regex2)
+    console.log(query+"-->"+start_index)
+    console.log(query+"-->"+finish_index)
     var file_content = result.substr(start_index,finish_index)
     writeRoughFile(file_content,index)
   })
@@ -93,17 +99,18 @@ function buildUserList(file){
         userInfo['informations'].push(info.text())
         //console.log(userInfo)
       })
-      //console.log(pageLink)
+      // console.log(JSON.stringify(userInfo))
+      // console.log(pageLink)
       var isIn = profilesInfos.filter(function(obj){
         return obj.pageLink === pageLink
       })
 
       if (userInfo['pageLink'].indexOf('/pages/')==-1 && isIn[0]==undefined){
         profilesInfos.push(userInfo)
-        if(numberCalls==2 && index==counter-1){
-          getUsersData(filterUsers(profilesInfos))
-          //console.log(profilesInfos)
-        }
+      }
+      if(numberCalls==2 && index==counter-1){
+        getUsersData(filterUsers(profilesInfos))
+        // console.log(profilesInfos)
       }
     })
  })
@@ -138,12 +145,16 @@ function filterUsers(profilesInfos){
 function getUsersData(profilesInfos){
   // IMPOSTARE TIMEOUT PER EVITARE CHE FB BLOCCHI L'ID
   // async x ogni utente e chiamo scrapeUser
-  // async.map(profilesInfos, scrapeUser, function(err, results){
-  //   // handle results
-  // })
+  async.each(profilesInfos, scrapeUser, function(err, results){
+    //console.log(results)
+  })
 }
 
 function scrapeUser(profileInfo,callback){
-  console.log(profileInfo)
-  callback(null,profileInfo)
+  start_time = new Date().getMilliseconds()
+  setTimeout(function(){
+    console.log(profileInfo)
+    callback(null,profileInfo)
+  },3000)
+
 }

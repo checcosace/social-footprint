@@ -15,22 +15,19 @@ module.exports={
   }
 }
 // inizializza e lancia lo scrape
-var name = "Crippa Elisabetta"
+var name = "Crippa Francesco"
 var query = createQuery(name)
 var index=0
 async.each(query,
   function(singleQuery,callback){
-    getRoughFile(singleQuery,index)
+    getRoughFile(singleQuery,index,function(profiles){
+      getUsersData(filterUsers(profilesInfos),
+      function(queryResult){
+        console.log(queryResult) //QUERYRESULT CONTIENE I RISULTATI FINALI
+      })
+    })
     index++
     callback()
-  },
-  function(err,result){
-    if(err){
-      console.log(err)
-    }
-    else{
-      console.log("RESULT"+profilesInfos)
-    }
   })
 
 
@@ -48,7 +45,7 @@ function createQuery(query){
 
 
 // ottiene il file "grezzo" della pagina HTML che deve essere parsato
-function getRoughFile(query,index) {
+function getRoughFile(query,index,callback) {
   url = 'http://www.facebook.com/public/'+query
   xray(url, 'body@html')(function(err,result){
     var regex1 = /<code class="hidden_elem" id="u_._."><!-- <div><div class="mbm detailedsearch_result">/i
@@ -57,18 +54,18 @@ function getRoughFile(query,index) {
     start_index = result.search(regex1) + result.match(regex3)[0].length
     finish_index = result.search(regex2)
     var file_content = result.substr(start_index,finish_index)
-    writeRoughFile(file_content,index)
+    writeRoughFile(file_content,index,callback)
   })
 }
 
 // salva il file HTML ritornato dalla chiamata in un file in locale
-function writeRoughFile(file_content,index){
+function writeRoughFile(file_content,index,callback){
   fs.writeFile('users'+index+'.html',file_content,function(err){
     if (err){
       return console.log(err)
     }
     else{
-      buildUserList('users'+index+'.html')
+      buildUserList('users'+index+'.html',callback)
     }
   })
 }
@@ -79,7 +76,7 @@ function writeRoughFile(file_content,index){
 // pagina dell'utente, informations: array di informazioni ricavate}
 // L'array degli utenti viene poi filtrato per togliere i nomi che non
 // corrispondono alla query
-function buildUserList(file){
+function buildUserList(file,callback){
   numberCalls++
   fs.readFile(file,'utf8',function(err,data){
     $=cheerio.load(data)
@@ -103,10 +100,9 @@ function buildUserList(file){
       if (userInfo['pageLink'].indexOf('/pages/')==-1 && isIn[0]==undefined){
         profilesInfos.push(userInfo)
       }
-      if(numberCalls==2 && index==counter-1){
-        getUsersData(filterUsers(profilesInfos))
-        // console.log(profilesInfos)
-      }
+       if(numberCalls==2 && index==counter-1){
+         callback(profilesInfos)
+       }
     })
  })
 }
@@ -137,20 +133,20 @@ function filterUsers(profilesInfos){
 // pagina dell'utente (tutto in profilesInfos). Questa funzione per ogni utente
 // esegue invoca un'altra funzione che esegue lo scraping dell'indirizzo
 // segnalato.
-function getUsersData(profilesInfos){
-  scheduleScraping(profilesInfos,0)
+function getUsersData(profilesInfos,callback){
+  scheduleScraping(profilesInfos,0,callback)
 }
 
-function scheduleScraping(profilesInfos,index){
+function scheduleScraping(profilesInfos,index,callback){
   var start_time = new Date().getTime()
   setTimeout(function(){
     //console.log(new Date().getTime()-start_time)
     scrapeUser(profilesInfos[index])
     if(index<profilesInfos.length-1){
-      scheduleScraping(profilesInfos,index+1)
+      scheduleScraping(profilesInfos,index+1,callback)
     }
     else{
-      return (profilesInfos)
+      callback(profilesInfos)
     }
   },3000)
 }

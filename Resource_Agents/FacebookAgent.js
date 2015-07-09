@@ -15,7 +15,7 @@ module.exports={
   }
 }
 // inizializza e lancia lo scrape
-var name = "Vizzari Giuseppe"
+var name = "Crippa Elisabetta"
 var query = createQuery(name)
 var index=0
 async.each(query,
@@ -23,8 +23,15 @@ async.each(query,
     getRoughFile(singleQuery,index)
     index++
     callback()
+  },
+  function(err,result){
+    if(err){
+      console.log(err)
+    }
+    else{
+      console.log("RESULT"+profilesInfos)
+    }
   })
-
 
 
 // crea una query formattata nella corretta maniera.
@@ -39,11 +46,6 @@ function createQuery(query){
 }
 
 
-// ritorna la lista degli utenti che corrispondono alla query
-// FILTRO: vengono tolti dalla lista gli utenti con nome simile ma non corrispondente
-// alla query
-// "ACCOPPIAMENTO": non ci sono utenti duplicati, siccome si eseguono due query
-// se lo stesso utente compare due volte si fa in modo che non ci siano duplicati
 
 // ottiene il file "grezzo" della pagina HTML che deve essere parsato
 function getRoughFile(query,index) {
@@ -52,12 +54,8 @@ function getRoughFile(query,index) {
     var regex1 = /<code class="hidden_elem" id="u_._."><!-- <div><div class="mbm detailedsearch_result">/i
     var regex2 = /<\/a><\/div><\/div> --><\/code>/i
     var regex3 = /<code class="hidden_elem" id="u_._."><!-- <div>/i
-    // start_index = result.indexOf(pattern)+pattern.length
-    // finish_index = result.lastIndexOf(' --></code>')//('\n<script>bigPipe.beforePageletArrive("pagelet_search_results")</script>\n')
     start_index = result.search(regex1) + result.match(regex3)[0].length
     finish_index = result.search(regex2)
-    console.log(query+"-->"+start_index)
-    console.log(query+"-->"+finish_index)
     var file_content = result.substr(start_index,finish_index)
     writeRoughFile(file_content,index)
   })
@@ -97,10 +95,7 @@ function buildUserList(file){
       scrape('.fbProfileBylineLabel').each(function(index2,item){
         info = $(this)
         userInfo['informations'].push(info.text())
-        //console.log(userInfo)
       })
-      // console.log(JSON.stringify(userInfo))
-      // console.log(pageLink)
       var isIn = profilesInfos.filter(function(obj){
         return obj.pageLink === pageLink
       })
@@ -143,18 +138,76 @@ function filterUsers(profilesInfos){
 // esegue invoca un'altra funzione che esegue lo scraping dell'indirizzo
 // segnalato.
 function getUsersData(profilesInfos){
-  // IMPOSTARE TIMEOUT PER EVITARE CHE FB BLOCCHI L'ID
-  // async x ogni utente e chiamo scrapeUser
-  async.each(profilesInfos, scrapeUser, function(err, results){
-    //console.log(results)
-  })
+  scheduleScraping(profilesInfos,0)
 }
 
-function scrapeUser(profileInfo,callback){
-  start_time = new Date().getMilliseconds()
+function scheduleScraping(profilesInfos,index){
+  var start_time = new Date().getTime()
   setTimeout(function(){
-    console.log(profileInfo)
-    callback(null,profileInfo)
+    //console.log(new Date().getTime()-start_time)
+    scrapeUser(profilesInfos[index])
+    if(index<profilesInfos.length-1){
+      scheduleScraping(profilesInfos,index+1)
+    }
+    else{
+      return (profilesInfos)
+    }
   },3000)
+}
 
+
+function scrapeUser(userInfo){
+  var file = 'singleuser.html'
+  var url = userInfo['pageLink']
+  xray(url, 'body@html')(function(err,result){
+    var regex1 = /<code class="hidden_elem" id="u_._."><!-- <div class="fbTimelineSection mtm timelineFavorites fbTimelineCompactSection"><div class="profileInfoSection"/i
+    var regex2 = /<\/tbody><\/table><\/div><\/div><\/div> --><\/code>/i
+    var regex3 = /<code class="hidden_elem" id="u_._."><!-- /i
+    start_index = result.search(regex1) + result.match(regex3)[0].length
+    finish_index = result.search(regex2)
+    var file_content = result.substr(start_index,finish_index)
+    fs.writeFile(file,file_content,function(err){
+      if (err){
+        return console.log(err)
+      }
+      else{
+        fs.readFile(file,'utf8',function(err,data){
+          $=cheerio.load(data)
+          var interests = $('.profileInfoSection tbody').each(function(index,element){
+            var interest = $(this)
+            var scrape = cheerio.load(interest+"\n")
+            var label = scrape('.label .labelContainer').text()
+            userInfo[label]=[]
+            scrape('.data a').each(function(index2,item){
+              var value = scrape(this)
+              userInfo[label].push(value.text())
+            })
+          })
+          var regex1 = /<code class="hidden_elem" id="._._."><!-- <div class="timelineLoggedOutSignUp.*">/i
+          var regex2 = /data-referrer="pagelet_contact"><\/div><\/div><\/div><\/div><\/div> --><\/code>/i
+          var regex3 = /<code class="hidden_elem" id="._._."><!--/i
+          var regex4 = /data-referrer="pagelet_contact"><\/div><\/div><\/div><\/div><\/div> -->/i
+          start_index = result.search(regex1) + result.match(regex3)[0].length
+          finish_index = result.search(regex2) + result.match(regex4)[0].length
+          var file_content = result.substr(start_index,finish_index)
+          fs.writeFile(file,file_content,function(err){
+            if (err){
+              return console.log(err)
+            }
+            else{
+              fs.readFile(file,'utf8',function(err,data){
+                $=cheerio.load(data)
+                if($('.profilePic')[0]!=undefined){
+                  userInfo['profileImgSrc'] = $('.profilePic')[0].attribs.src
+                }
+                else{
+                  userInfo['profileImgSrc'] = null
+                }
+              })
+            }
+          })
+        })
+      }
+    })
+  })
 }

@@ -8,28 +8,29 @@ var async = require('async')
 
 var profilesInfos = []
 var numberCalls=0
+
 module.exports={
-  pullDataFromSource: function (query,callback){
-
-
+  pullDataFromSource: function (name,callbackMain){
+  // inizializza e lancia lo scrape
+  //var name = "Crippa Francesco"
+  console.log("FACEBOOK")
+  var query = createQuery(name)
+  var index=0
+  console.log(query)
+  async.each(query,
+    function(singleQuery,callback){
+      getRoughFile(singleQuery,index,function(profiles){
+        getUsersData(filterUsers(query,profilesInfos),
+        function(queryResult){
+          callbackMain(queryResult)
+          //console.log(queryResult) //QUERYRESULT CONTIENE I RISULTATI FINALI
+        })
+      })
+      index++
+      callback()
+    })
   }
 }
-// inizializza e lancia lo scrape
-var name = "Crippa Francesco"
-var query = createQuery(name)
-var index=0
-async.each(query,
-  function(singleQuery,callback){
-    getRoughFile(singleQuery,index,function(profiles){
-      getUsersData(filterUsers(profilesInfos),
-      function(queryResult){
-        console.log(queryResult) //QUERYRESULT CONTIENE I RISULTATI FINALI
-      })
-    })
-    index++
-    callback()
-  })
-
 
 // crea una query formattata nella corretta maniera.
 // query è un array di due elementi del tipo:
@@ -109,24 +110,24 @@ function buildUserList(file,callback){
 
 // verifica che gli userName degli utenti trovati corrispondano alla query
 // inserita, controllando nome e cognome
-function filterUsers(profilesInfos){
-    var nomeCognome = query[0].split("-")
-    for (index in profilesInfos){
-      condition1=(nomeCognome[0].indexOf(profilesInfos[index]['userName'])!=-1)
-      condition2=(nomeCognome[1].indexOf(profilesInfos[index]['userName'])!=-1)
-      if(condition1 || condition2){
-        profilesInfos[index]= null
-      }
+function filterUsers(query,profilesInfos){
+  var nomeCognome = query[0].split("-")
+  for (index in profilesInfos){
+    condition1=(nomeCognome[0].indexOf(profilesInfos[index]['userName'])!=-1)
+    condition2=(nomeCognome[1].indexOf(profilesInfos[index]['userName'])!=-1)
+    if(condition1 || condition2){
+      profilesInfos[index]= null
     }
-    var profileCounter = 0
-    var filteredProfileInfos = []
-    for (index in profilesInfos){
-      if (profilesInfos[index]!=null){
-        filteredProfileInfos[profileCounter]=profilesInfos[index]
-        profileCounter++
-      }
+  }
+  var profileCounter = 0
+  var filteredProfileInfos = []
+  for (index in profilesInfos){
+    if (profilesInfos[index]!=null){
+      filteredProfileInfos[profileCounter]=profilesInfos[index]
+      profileCounter++
     }
-    return filteredProfileInfos
+  }
+  return filteredProfileInfos
 }
 
 // riceve la lista degli utenti con le informazioni base e l'indirizzo della

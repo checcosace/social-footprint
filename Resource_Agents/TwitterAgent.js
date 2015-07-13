@@ -8,8 +8,27 @@ var client = new Twitter({
   access_token_secret: '6mX5CZM7Gt8rPGSkyQTxMlUVA1dfzScjwUUC4HAALutII'
 })
 
-var name = "Crippa Francesco"
-var query = createQuery(name)
+
+module.exports={
+  pullDataFromSource: function (name,callback){
+    //var name = "Crippa Francesco"
+    console.log("TWITTER")
+    var query = createQuery(name)
+    //esegue le due query
+    async.map(query,getUsersList,
+      function(err,result){
+      //result continene le due liste di screen_name corrispondenti alle due query
+      var userList = merge(result)
+      async.map(userList,getUserData,function(err,queryResult){
+        //console.log(queryResult)
+        callback(queryResult)
+        })
+    })
+  }
+}
+
+
+
 
 // ritorna i primi 2 utenti che corrispondono alla query inserita
 var getUsersList = function(query,callback){
@@ -58,16 +77,7 @@ var getUserData = function(screen_name,callback){
   })
 }
 
-//esegue le due query
-async.map(query,getUsersList,
-  function(err,result){
-    //result continene le due liste di screen_name corrispondenti alle due query
-    var userList = merge(result)
-    async.map(userList,getUserData,function(err,queryResult){
-      console.log(queryResult)
-    })
 
-  })
 
 // crea query del tipo [nome cognome, cognome nome]
 function createQuery(query){

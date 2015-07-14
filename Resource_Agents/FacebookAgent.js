@@ -13,7 +13,7 @@ module.exports={
   pullDataFromSource: function (name,callbackMain){
   // inizializza e lancia lo scrape
   //var name = "Crippa Francesco"
-  console.log("FACEBOOK")
+  console.log("FACEBOOK Agent Started")
   var query = createQuery(name)
   var index=0
   console.log(query)
@@ -22,6 +22,7 @@ module.exports={
       getRoughFile(singleQuery,index,function(profiles){
         getUsersData(filterUsers(query,profilesInfos),
         function(queryResult){
+          console.log('FACEBOOK Callbacking query results')
           callbackMain(queryResult)
           //console.log(queryResult) //QUERYRESULT CONTIENE I RISULTATI FINALI
         })
@@ -74,7 +75,7 @@ function writeRoughFile(file_content,index,callback){
 // esegue il parsing del file HTML in locale e lo trasforma in un formato
 // utilizzabile. Poi esegue lo scraping del file e ritorna un array di utenti
 // con oggetti in forma {userName:nome dell'utente, pageLink:indirizzo della
-// pagina dell'utente, informations: array di informazioni ricavate}
+// pagina dell'utente, information: array di informazioni ricavate}
 // L'array degli utenti viene poi filtrato per togliere i nomi che non
 // corrispondono alla query
 function buildUserList(file,callback){
@@ -85,14 +86,14 @@ function buildUserList(file,callback){
     $('.detailedsearch_result').each(function(index,element){
       userInfos = $(this)
       scrape = cheerio.load(userInfos+"\n")
-      var userInfo = {'informations':[]}
+      var userInfo = {'information':[]}
       var pageLink = scrape('.instant_search_title a')[0].attribs.href
       var userName = scrape('.instant_search_title a').text()
       userInfo['pageLink']= pageLink
       userInfo['userName']= userName
       scrape('.fbProfileBylineLabel').each(function(index2,item){
         info = $(this)
-        userInfo['informations'].push(info.text())
+        userInfo['information'].push(info.text())
       })
       var isIn = profilesInfos.filter(function(obj){
         return obj.pageLink === pageLink
@@ -102,6 +103,7 @@ function buildUserList(file,callback){
         profilesInfos.push(userInfo)
       }
        if(numberCalls==2 && index==counter-1){
+         console.log('FACEBOOK Getting users\'s list')
          callback(profilesInfos)
        }
     })
@@ -113,8 +115,8 @@ function buildUserList(file,callback){
 function filterUsers(query,profilesInfos){
   var nomeCognome = query[0].split("-")
   for (index in profilesInfos){
-    condition1=(nomeCognome[0].indexOf(profilesInfos[index]['userName'])!=-1)
-    condition2=(nomeCognome[1].indexOf(profilesInfos[index]['userName'])!=-1)
+    condition1=(profilesInfos[index]['userName'].indexOf(nomeCognome[0])==-1)
+    condition2=(profilesInfos[index]['userName'].indexOf(nomeCognome[1])==-1)
     if(condition1 || condition2){
       profilesInfos[index]= null
     }
@@ -139,7 +141,7 @@ function getUsersData(profilesInfos,callback){
 }
 
 function scheduleScraping(profilesInfos,index,callback){
-  var start_time = new Date().getTime()
+  //var start_time = new Date().getTime()
   setTimeout(function(){
     //console.log(new Date().getTime()-start_time)
     scrapeUser(profilesInfos[index])
@@ -147,6 +149,7 @@ function scheduleScraping(profilesInfos,index,callback){
       scheduleScraping(profilesInfos,index+1,callback)
     }
     else{
+      console.log('FACEBOOK Getting user\'s data')
       callback(profilesInfos)
     }
   },3000)

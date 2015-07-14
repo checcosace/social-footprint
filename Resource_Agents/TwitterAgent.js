@@ -12,7 +12,7 @@ var client = new Twitter({
 module.exports={
   pullDataFromSource: function (name,callback){
     //var name = "Crippa Francesco"
-    console.log("TWITTER")
+    console.log("TWITTER Agent Started")
     var query = createQuery(name)
     //esegue le due query
     async.map(query,getUsersList,
@@ -21,14 +21,12 @@ module.exports={
       var userList = merge(result)
       async.map(userList,getUserData,function(err,queryResult){
         //console.log(queryResult)
-        callback(queryResult)
+        console.log('TWITTER Callbacking query results')
+        callback(queryResult) //RESULTS
         })
     })
   }
 }
-
-
-
 
 // ritorna i primi 2 utenti che corrispondono alla query inserita
 var getUsersList = function(query,callback){
@@ -39,6 +37,7 @@ var getUsersList = function(query,callback){
       for (index in users){
         userList.push(users[index].screen_name)
       }
+      console.log('TWITTER Getting users\'s list')
       return callback(null,userList)
     }
     else{
@@ -67,6 +66,7 @@ var getUserData = function(screen_name,callback){
       else{
         userInfo = getUserInformation(screen_name,function(userInfo){
           //console.log(userInfo)
+          console.log('TWITTER Getting users\'s data')
           return callback(null,userInfo)
         })
       }

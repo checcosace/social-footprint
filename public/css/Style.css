@@ -1,0 +1,57 @@
+body{
+  background-attachment : fixed;
+}
+.blended_grid{
+  display : block;
+  width : 1200px;
+  overflow : auto;
+  margin : 0 auto;
+}
+.pageHeader{
+  float : left;
+  clear : none;
+  height : 50px;
+  width : 1200px;
+}
+.pageBarLeft{
+  float : left;
+  clear : none;
+  width : 400px;
+  min-height : 900px;
+}
+.pageContent{
+  float : left;
+  clear : none;
+  height : 1000px;
+  width : 400px;
+}
+.pageBarRight{
+  float : left;
+  clear : none;
+  width : 400px;
+  min-height : 900px;
+}
+.list-group{
+  height: 120px;
+  border: solid;
+  border-width: thin;
+  border-radius: 10px;
+}
+
+.list-group img{
+  padding-left: 5px;
+  padding-top: 5px;
+  float: left;
+  height: 80px;
+  width: 80px;
+}
+
+.list-group h4 {
+  padding-top: 5px;
+  padding-left: 3px;
+}
+
+.list-group p {
+  padding-top: 5px;
+  padding-left: 5px;
+}

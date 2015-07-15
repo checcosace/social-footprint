@@ -22,7 +22,7 @@ module.exports={
       async.map(userList,getUserData,function(err,queryResult){
         //console.log(queryResult)
         console.log('TWITTER Callbacking query results')
-        callback(queryResult) //RESULTS
+        callback({source:'Twitter',results:queryResult}) //RESULTS
         })
     })
   }
@@ -53,10 +53,11 @@ var getUserData = function(screen_name,callback){
     if (!error) {
       if(tweets.length!=0){
         userInfo['id']=tweets[0].user.id
-        userInfo['screen_name']=tweets[0].user.screen_name
-        userInfo['name']=tweets[0].user.name
+        userInfo['userName']=tweets[0].user.name
+        userInfo['nickName']=tweets[0].user.screen_name
         userInfo['description']=tweets[0].user.description
-        userInfo['profile_image_url']=tweets[0].user.profile_image_url
+        userInfo['pageLink']='www.twitter.com/'+tweets[0].user.screen_name
+        userInfo['profileImage']=tweets[0].user.profile_image_url
         for (index in tweets){
           userInfo['tweets'].push(tweets[index].text)
         }
@@ -107,10 +108,11 @@ function getUserInformation(screen_name,callback){
     if (!error) {
       var userInfo = {}
       userInfo['id']=users[0].id
-      userInfo['screen_name']=users[0].screen_name
-      userInfo['name']=users[0].name
+      userInfo['userName']=users[0].name
+      userInfo['nickName']=users[0].screen_name
       userInfo['description']=users[0].description
-      userInfo['profile_image_url']=users[0].profile_image_url
+      userInfo['pageLink']='www.twitter.com/'+users[0].name
+      userInfo['profileImage']=users[0].profile_image_url
       callback(userInfo)
     }
     else{

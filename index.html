@@ -1,30 +1,47 @@
 <!DOCTYPE html>
+<html ng-app="app">
 <head>
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <!-- Angular.js -->
+  <script src="public/js/angular.js"></script>
+  <!-- Angular Application-->
+  <script src="public/js/app.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="public/js/bootstrap.min.js"></script>
+  <!-- Bootstrap -->
+  <link href="public/css/bootstrap.min.css" rel="stylesheet">
+  <!-- JS support file-->
+  <script src="public/js/appInteface.js"></script>
+  <!-- Style.css -->
+  <link rel="stylesheet" type="text/css" href="public/css/Style.css">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <link rel="stylesheet" type="text/css" href="pulic/Style.css">
-  <title>Page Title</title>
-  <meta name="description" content="Write some words to describe your html page">
+  <title>Social Footprint</title>
 </head>
 <body>
   <div class="blended_grid">
-    <div class="pageHeader">
+    <div id="inputForm" class="pageHeader">
+      <div class="input-group input-group-lg">
+        <span class="input-group-addon" id="sizing-addon1">Search people by name:</span>
+        <input id="input_text" type="text" class="form-control" placeholder="Firstname Lastname" aria-describedby="sizing-addon1" onkeydown="submitText(this)">
+      </div>
     </div>
-    <div class="pageBarLeft">
-      <div class="pageLeftTop">
-      </div>
-      <div class="pageLeftMid">
-      </div>
-      <div class="pageLeftBottom">
+    <div class="pageBarLeft" ng-controller="FirstSourceController">
+      <h1> {{source}} </h1>
+      <div class="list-group" ng-repeat="user in queryResult track by $index">
+          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> </h4>
+          <a ng-href="{{user.profileImage}}"><img ng-src="{{user.profileImage}}"></a>
+          <p class="list-group-item-text" >{{user.description}}</p>
       </div>
     </div>
     <div class="pageContent">
     </div>
-    <div class="pageBarRight">
-      <div class="pageRightTop">
-      </div>
-      <div class="pageRightMid">
-      </div>
-      <div class="pageRightBottom">
+    <div class="pageBarRight" ng-controller="SecondSourceController">
+      <h1> {{source}} </h1>
+      <div class="list-group" ng-repeat="user in queryResult track by $index">
+          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> </h4>
+          <a ng-href="{{user.profileImage}}"><img ng-src="{{user.profileImage}}"></a>
+          <p class="list-group-item-text" >{{user.description}}</p>
       </div>
     </div>
   </div>

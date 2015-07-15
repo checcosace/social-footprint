@@ -22,7 +22,7 @@ module.exports={
         getUsersData(filterUsers(query,profilesInfos),
         function(queryResult){
           console.log('FACEBOOK Callbacking query results')
-          callbackMain(queryResult)
+          callbackMain({source:'Facebook',results:queryResult})
           //console.log(queryResult) //QUERYRESULT CONTIENE I RISULTATI FINALI
         })
       })
@@ -74,7 +74,7 @@ function writeRoughFile(file_content,index,callback){
 // esegue il parsing del file HTML in locale e lo trasforma in un formato
 // utilizzabile. Poi esegue lo scraping del file e ritorna un array di utenti
 // con oggetti in forma {userName:nome dell'utente, pageLink:indirizzo della
-// pagina dell'utente, information: array di informazioni ricavate}
+// pagina dell'utente, description: array di informazioni ricavate}
 // L'array degli utenti viene poi filtrato per togliere i nomi che non
 // corrispondono alla query
 function buildUserList(file,callback){
@@ -85,14 +85,14 @@ function buildUserList(file,callback){
     $('.detailedsearch_result').each(function(index,element){
       userInfos = $(this)
       scrape = cheerio.load(userInfos+"\n")
-      var userInfo = {'information':[]}
+      var userInfo = {'description':[]}
       var pageLink = scrape('.instant_search_title a')[0].attribs.href
       var userName = scrape('.instant_search_title a').text()
       userInfo['pageLink']= pageLink
       userInfo['userName']= userName
       scrape('.fbProfileBylineLabel').each(function(index2,item){
         info = $(this)
-        userInfo['information'].push(info.text())
+        userInfo['description'].push(info.text())
       })
       var isIn = profilesInfos.filter(function(obj){
         return obj.pageLink === pageLink
@@ -196,10 +196,10 @@ function scrapeUser(userInfo){
               fs.readFile(file,'utf8',function(err,data){
                 $=cheerio.load(data)
                 if($('.profilePic')[0]!=undefined){
-                  userInfo['profileImgSrc'] = $('.profilePic')[0].attribs.src
+                  userInfo['profileImage'] = $('.profilePic')[0].attribs.src
                 }
                 else{
-                  userInfo['profileImgSrc'] = null
+                  userInfo['profileImage'] = null
                 }
               })
             }

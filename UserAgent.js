@@ -26,5 +26,34 @@ app.get(/^.*-.*(?:\/(?=$))?$/i,function(req,res){
   }
 })
 
+
+app.get('/index.html',function(req,res){
+  res.sendFile(__dirname+'/index.html')
+})
+
+// return the requested resource
+app.get('/public*',function(req,res){
+    //match request path
+    //console.log(JSON.stringify(req.params[0]))
+    res.sendFile(__dirname+'/public'+req.params[0])
+})
+
+app.get('/sendQuery',function(req,res){
+  var query = req.query.q
+  index = query.indexOf(" ")
+  query = query.substr(0,index)+"-"+query.substr(index+1,query.length)
+  console.log(query)
+  BrokerAgent.sendQuery(query,function(queryResult){
+    //res.writeHead(200, {'Content-Type': 'text/plain'})
+    res.write(JSON.stringify(queryResult))
+    resCounter = resCounter+1
+    if (resCounter==2){ // mettere == 3 quando si aggiungerà lo script python
+      res.end()
+    }
+    //res.end(JSON.stringify(queryResult))
+  })
+})
+
+
 var server = app.listen(8080, "localhost")
 console.log('Local Server Listening at http://localhost:',8080)

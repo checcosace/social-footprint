@@ -11,7 +11,7 @@ var queryName = null
 
 module.exports={
   sendQuery: function(query,callback){
-    query = 'Crippa Francesco'
+    //query = 'Crippa Francesco'
     runBrokerAgent(query,function(queryResult){
       // MONGODB SAVE RESULTS
       callback(queryResult)
@@ -62,7 +62,6 @@ function loadXMLDoc(finalCallback) {
     } catch (ex) {console.log("Exception: "+ex)}
 }
 function resourceAgentsTaskGeneration(resource_agents,callback,finalCallback){
-  console.log(finalCallback.toString())
   async.map(resource_agents,
     function(agent,callback){
         taskGenerator(agent,callback,finalCallback)
@@ -73,7 +72,6 @@ function resourceAgentsTaskGeneration(resource_agents,callback,finalCallback){
 }
 
 function taskGenerator(resource_agent,callback,finalCallback){
-  console.log(finalCallback.toString())
   var task = function () {
     var ResourceAgent = require('./Resource_Agents/'+resource_agent)
     ResourceAgent.pullDataFromSource(queryName,function(queryResult){

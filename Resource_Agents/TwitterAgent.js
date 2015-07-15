@@ -81,7 +81,7 @@ var getUserData = function(screen_name,callback){
 
 // crea query del tipo [nome cognome, cognome nome]
 function createQuery(query){
-  var name = query.split(' ')
+  var name = query.split('-')
   query=[]
   query.push(name[0]+' '+name[1])
   query.push(name[1]+' '+name[0])

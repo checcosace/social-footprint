@@ -4,7 +4,7 @@ var app = express()
 var BrokerAgent = require('./BrokerAgent')
 var resCounter = 0
 
-app.get('/*',function(req,res){
+app.get(/^.*-.*(?:\/(?=$))?$/i,function(req,res){
   var urlPath = req.url
   var startIndex = 1
   var finalIndex = req.url.length-1
@@ -24,7 +24,6 @@ app.get('/*',function(req,res){
   else{
     res.end('ERROR! Insert path like LastName-FirstName OR FirstName-LastName')
   }
-
 })
 
 var server = app.listen(8080, "localhost")

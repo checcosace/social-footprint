@@ -16,7 +16,6 @@ module.exports={
   console.log("FACEBOOK Agent Started")
   var query = createQuery(name)
   var index=0
-  console.log(query)
   async.each(query,
     function(singleQuery,callback){
       getRoughFile(singleQuery,index,function(profiles){
@@ -37,7 +36,7 @@ module.exports={
 // query è un array di due elementi del tipo:
 // [cognome-nome, nome-cognome]
 function createQuery(query){
-  var name = query.split(' ')
+  var name = query.split('-')
   query=[]
   query.push(name[0]+'-'+name[1])
   query.push(name[1]+'-'+name[0])
@@ -104,6 +103,7 @@ function buildUserList(file,callback){
       }
        if(numberCalls==2 && index==counter-1){
          console.log('FACEBOOK Getting users\'s list')
+         //console.log(JSON.stringify(profilesInfos,null,2))
          callback(profilesInfos)
        }
     })
@@ -115,8 +115,8 @@ function buildUserList(file,callback){
 function filterUsers(query,profilesInfos){
   var nomeCognome = query[0].split("-")
   for (index in profilesInfos){
-    condition1=(profilesInfos[index]['userName'].indexOf(nomeCognome[0])==-1)
-    condition2=(profilesInfos[index]['userName'].indexOf(nomeCognome[1])==-1)
+    condition1=(profilesInfos[index]['userName'].toLowerCase().indexOf(nomeCognome[0].toLowerCase())==-1)
+    condition2=(profilesInfos[index]['userName'].toLowerCase().indexOf(nomeCognome[1].toLowerCase())==-1)
     if(condition1 || condition2){
       profilesInfos[index]= null
     }
@@ -141,9 +141,7 @@ function getUsersData(profilesInfos,callback){
 }
 
 function scheduleScraping(profilesInfos,index,callback){
-  //var start_time = new Date().getTime()
   setTimeout(function(){
-    //console.log(new Date().getTime()-start_time)
     scrapeUser(profilesInfos[index])
     if(index<profilesInfos.length-1){
       scheduleScraping(profilesInfos,index+1,callback)

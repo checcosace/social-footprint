@@ -43,10 +43,25 @@ function createQuery(query){
   return query
 }
 
-
+// Retunr true if array contains an object with same property
+function contains(array,object,property){
+  if (array.length==0){
+    return false
+  }
+  else{
+    for (index in array){
+      if (array[index][property]==object[property]){
+        console.log("DELETED DUPLICATE-->"+JSON.stringify(object))
+        return true
+      }
+    }
+    return false
+  }
+}
 
 // ottiene il file "grezzo" della pagina HTML che deve essere parsato
 function getRoughFile(query,index,callback) {
+  console.log("FACEBOOK Scraping users list")
   url = 'http://www.facebook.com/public/'+query
   xray(url, 'body@html')(function(err,result){
     var regex1 = /<code class="hidden_elem" id="u_._."><!-- <div><div class="mbm detailedsearch_result">/i
@@ -79,6 +94,7 @@ function writeRoughFile(file_content,index,callback){
 // corrispondono alla query
 function buildUserList(file,callback){
   numberCalls++
+  console.log("FACEBOOK Getting users list")
   fs.readFile(file,'utf8',function(err,data){
     $=cheerio.load(data)
     var counter = $('.detailedsearch_result').length
@@ -94,11 +110,9 @@ function buildUserList(file,callback){
         info = $(this)
         userInfo['description'].push(info.text())
       })
-      var isIn = profilesInfos.filter(function(obj){
-        return obj.pageLink === pageLink
-      })
 
-      if (userInfo['pageLink'].indexOf('/pages/')==-1 && isIn[0]==undefined){
+      var isIn = contains(profilesInfos,userInfo,'pageLink')
+      if (userInfo['pageLink'].indexOf('/pages/')==-1 && isIn==false){
         profilesInfos.push(userInfo)
       }
        if(numberCalls==2 && index==counter-1){
@@ -118,6 +132,7 @@ function filterUsers(query,profilesInfos){
     condition1=(profilesInfos[index]['userName'].toLowerCase().indexOf(nomeCognome[0].toLowerCase())==-1)
     condition2=(profilesInfos[index]['userName'].toLowerCase().indexOf(nomeCognome[1].toLowerCase())==-1)
     if(condition1 || condition2){
+      console.log("DELETED FILTERED-->"+JSON.stringify(profilesInfos[index]))
       profilesInfos[index]= null
     }
   }
@@ -142,19 +157,19 @@ function getUsersData(profilesInfos,callback){
 
 function scheduleScraping(profilesInfos,index,callback){
   setTimeout(function(){
-    scrapeUser(profilesInfos[index])
-    if(index<profilesInfos.length-1){
+    if(index<profilesInfos.length){
+      console.log('FACEBOOK Getting user\'s data')
+      scrapeUser(profilesInfos[index])
       scheduleScraping(profilesInfos,index+1,callback)
     }
     else{
-      console.log('FACEBOOK Getting user\'s data')
       callback(profilesInfos)
     }
   },3000)
 }
 
 
-function scrapeUser(userInfo){
+function scrapeUser(userInfo){ //SALTA SEMPRE L'ULTIMO UTENTE
   var file = 'singleuser.html'
   var url = userInfo['pageLink']
   xray(url, 'body@html')(function(err,result){

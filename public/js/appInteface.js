@@ -3,6 +3,12 @@ var chunkLength = 0
 
 function submitText(textForm){
   if(event.keyCode==13){
+    var target1 = document.getElementById("leftContent")
+    spinner1 = new Spinner(opts).spin()
+    target1.appendChild(spinner1.el)
+    var target2 = document.getElementById("rightContent")
+    spinner2 = new Spinner(opts).spin()
+    target2.appendChild(spinner2.el)
     sendQuery(textForm.value)
   }
 }
@@ -14,74 +20,66 @@ function sendQuery(query) {
     url: "http://localhost:8080/sendQuery",
     data: {q:query},
     xhrFields: {
-                onprogress: function(e){
-                  if(resCounter!=0){
-                    var chunk = e.currentTarget.response.substring(chunkLength,e.currentTarget.response.length)
-                    result = JSON.parse(chunk)
-                    chunkLength = e.currentTarget.response.length
-                    if(resCounter==1){
-                      scope = angular.element('.pageBarLeft').scope()
-                      scope.$apply(
-                        function () {
-                          console.log("RISULTATI "+result)
-                          console.log(result.source)
-                          scope.setSource(result.source)
-                          scope.setResults(result.results)
-                        })
-                    }
-                    else {
-                      if(resCounter==2){
-                        scope = angular.element('.pageBarRight').scope()
-                        scope.$apply(
-                          function () {
-                            console.log(result)
-                            console.log(result.source)
-                            scope.setSource(result.source)
-                            scope.setResults(result.results)
-                          })
-                      }
-                    }
-                  }
-                  resCounter++
-                }
+      onprogress: function(e){
+        if(resCounter!=0){
+          var chunk = e.currentTarget.response.substring(chunkLength,e.currentTarget.response.length)
+          result = JSON.parse(chunk)
+          chunkLength = e.currentTarget.response.length
+          if(resCounter==1){
+            scope = angular.element('.pageBarLeft').scope()
+            scope.$apply(
+              function () {
+                console.log(result)
+                console.log(result.source)
+                spinner1.stop()
+                scope.setSource(result.source)
+                scope.setResults(result.results)
+              })
+          }
+          else {
+            if(resCounter==2){
+              scope = angular.element('.pageBarRight').scope()
+              scope.$apply(
+                function () {
+                  console.log(result)
+                  console.log(result.source)
+                  spinner2.stop()
+                  scope.setSource(result.source)
+                  scope.setResults(result.results)
+                })
             }
-    // success: function(result){
-    //   result = JSON.parse(result)
-    //   var scope=null;
-    //   //console.log("RESPONSE:"+result)
-    //   if(resCounter==0){
-    //     scope = angular.element('.pageBarLeft').scope()
-    //     scope.$apply(
-    //       function () {
-    //         console.log("RISULTATI "+result)
-    //         console.log(result.source)
-    //         scope.setSource(result.source)
-    //         scope.setResults(result.results)
-    //         resCounter++
-    //       })
-    //   }
-    //   else {
-    //     if(resCounter==1){
-    //       scope = angular.element('.pageBarRight').scope()
-    //       scope.$apply(
-    //         function () {
-    //           console.log(result)
-    //           console.log(result.source)
-    //           scope.setSource(result.source)
-    //           scope.setResults(result.results)
-    //         })
-    //     }
-    //   }
-    // }
+          }
+        }
+      resCounter++
+    }
+  }
   })
-
-
-  // var xhr = new XMLHttpRequest()
-  // xhr.open("GET", "http://localhost:8080/sendQuery?q="+query, true)
-  // xhr.onprogress = function (event) {
-  //   console.log(event)
-  //   resCounter=resCounter+1
-  //   console.log("Source: "+JSON.parse(xhr.responseText).source)//works...aggiungere il resto
-  // }
-  // xhr.send()
 }
+
+var opts = {
+  lines: 13 // The number of lines to draw
+, length: 28 // The length of each line
+, width: 14 // The line thickness
+, radius: 42 // The radius of the inner circle
+, scale: 0.5 // Scales overall size of the spinner
+, corners: 1 // Corner roundness (0..1)
+, color: '#000' // #rgb or #rrggbb or array of colors
+, opacity: 0.25 // Opacity of the lines
+, rotate: 0 // The rotation offset
+, direction: 1 // 1: clockwise, -1: counterclockwise
+, speed: 1 // Rounds per second
+, trail: 60 // Afterglow percentage
+, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+, zIndex: 2e9 // The z-index (defaults to 2000000000)
+, className: 'spinner' // The CSS class to assign to the spinner
+, top: '300px' // Top position relative to parent
+, left: '50%' // Left position relative to parent
+, shadow: false // Whether to render a shadow
+, hwaccel: false // Whether to use hardware acceleration
+, position: 'relative' // Element positioning
+}
+
+// var target = document.getElementById("centralContent")
+// console.log(target)
+// var spinner = new Spinner(opts).spin()
+// target.appendChild(spinner.el)

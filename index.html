@@ -11,8 +11,8 @@
   <script src="public/js/bootstrap.min.js"></script>
   <!-- Bootstrap -->
   <link href="public/css/bootstrap.min.css" rel="stylesheet">
-  <!-- JS support file-->
-  <script src="public/js/appInteface.js"></script>
+  <!-- Spinner -->
+  <script src="public/js/spin.js"></script>
   <!-- Style.css -->
   <link rel="stylesheet" type="text/css" href="public/css/Style.css">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -22,11 +22,11 @@
   <div class="blended_grid">
     <div id="inputForm" class="pageHeader">
       <div class="input-group input-group-lg">
-        <span class="input-group-addon" id="sizing-addon1">Search people by name:</span>
+        <span class="input-group-addon" id="sizing-addon1">Search person by name:</span>
         <input id="input_text" type="text" class="form-control" placeholder="Firstname Lastname" aria-describedby="sizing-addon1" onkeydown="submitText(this)">
       </div>
     </div>
-    <div class="pageBarLeft" ng-controller="FirstSourceController">
+    <div id="leftContent" class="pageBarLeft" ng-controller="FirstSourceController">
       <h1> {{source}} </h1>
       <div class="list-group" ng-repeat="user in queryResult track by $index">
           <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> </h4>
@@ -34,9 +34,9 @@
           <p class="list-group-item-text" >{{user.description}}</p>
       </div>
     </div>
-    <div class="pageContent">
+    <div id="centralContent" class="pageContent">
     </div>
-    <div class="pageBarRight" ng-controller="SecondSourceController">
+    <div id="rightContent" class="pageBarRight" ng-controller="SecondSourceController">
       <h1> {{source}} </h1>
       <div class="list-group" ng-repeat="user in queryResult track by $index">
           <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> </h4>
@@ -46,4 +46,6 @@
     </div>
   </div>
 </body>
+<!-- JS support file-->
+<script src="public/js/appInteface.js"></script>
 </html>

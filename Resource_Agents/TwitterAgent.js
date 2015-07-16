@@ -7,7 +7,7 @@ var client = new Twitter({
   access_token_key: '1390496706-UmGd3ICa4zJqfBKzPGNHgZiFnxlozMyZcIqj3lj',
   access_token_secret: '6mX5CZM7Gt8rPGSkyQTxMlUVA1dfzScjwUUC4HAALutII'
 })
-
+// !!!!!!!!!!!!!!!!!!!!!!!!!MANCA FILTRAGGIO UTENTI !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 module.exports={
   pullDataFromSource: function (name,callback){
@@ -18,7 +18,7 @@ module.exports={
     async.map(query,getUsersList,
       function(err,result){
       //result continene le due liste di screen_name corrispondenti alle due query
-      var userList = merge(result)
+      var userList = merge(result,name)
       async.map(userList,getUserData,function(err,queryResult){
         //console.log(queryResult)
         console.log('TWITTER Callbacking query results')
@@ -28,6 +28,33 @@ module.exports={
   }
 }
 
+// crea query del tipo [nome cognome, cognome nome]
+function createQuery(query){
+  var name = query.split('-')
+  query=[]
+  query.push(name[0]+' '+name[1])
+  query.push(name[1]+' '+name[0])
+  return query
+}
+
+// fonde le due liste di screen_name, creandone una unica e senza duplicati
+function merge(userLists,name){
+  var mergedUserList = []
+  for (index in userLists){
+    for (id in userLists[index]){
+      if (mergedUserList.indexOf(userLists[index][id])==-1){
+        mergedUserList.push(userLists[index][id])
+      }
+      else{
+        console.log("TWITTER DELETE DUPLICATE ---> "+userLists[index][id])
+      }
+    }
+  }
+  console.log(JSON.stringify(mergedUserList))
+  return mergedUserList
+}
+
+
 // ritorna i primi 2 utenti che corrispondono alla query inserita
 var getUsersList = function(query,callback){
   var params = {q: query}
@@ -35,7 +62,7 @@ var getUsersList = function(query,callback){
   client.get('users/search.json', params, function(error, users, response){
     if (!error) {
       for (index in users){
-        userList.push(users[index].screen_name)
+        userList.push(users[index].id)
       }
       console.log('TWITTER Getting users\'s list')
       return callback(null,userList)
@@ -46,8 +73,8 @@ var getUsersList = function(query,callback){
   })
 }
 
-var getUserData = function(screen_name,callback){
-  params = {screen_name:screen_name,count:200}
+var getUserData = function(id,callback){
+  params = {user_id:id,count:200}
   client.get('statuses/user_timeline', params, function(error, tweets, response){
     var userInfo = {'tweets':[]}
     if (!error) {
@@ -65,7 +92,7 @@ var getUserData = function(screen_name,callback){
         return callback(null,userInfo)
       }
       else{
-        userInfo = getUserInformation(screen_name,function(userInfo){
+        userInfo = getUserInformation(id,function(userInfo){
           //console.log(userInfo)
           console.log('TWITTER Getting users\'s data')
           return callback(null,userInfo)
@@ -79,44 +106,21 @@ var getUserData = function(screen_name,callback){
 }
 
 
-
-// crea query del tipo [nome cognome, cognome nome]
-function createQuery(query){
-  var name = query.split('-')
-  query=[]
-  query.push(name[0]+' '+name[1])
-  query.push(name[1]+' '+name[0])
-  return query
-}
-// fonde le due liste di screen_name, creandone una unica senza duplicati
-function merge(userLists){
-  var mergedUserList = []
-  for (index in userLists){
-    for (userName in userLists[index]){
-      if (mergedUserList.indexOf(userLists[index][userName])==-1){
-        mergedUserList.push(userLists[index][userName])
-      }
-    }
-  }
-  return mergedUserList
-}
-
-
-function getUserInformation(screen_name,callback){
-  params = {q:screen_name}
-  client.get('users/search.json', params, function(error, users, response){
+function getUserInformation(id,callback){
+  params = {user_id:id}
+  client.get('users/show.json', params, function(error, users, response){
     if (!error) {
       var userInfo = {}
-      userInfo['id']=users[0].id
-      userInfo['userName']=users[0].name
-      userInfo['nickName']=users[0].screen_name
-      userInfo['description']=users[0].description
-      userInfo['pageLink']='www.twitter.com/'+users[0].name
-      userInfo['profileImage']=users[0].profile_image_url
+      userInfo['id']=users.id
+      userInfo['userName']=users.name
+      userInfo['nickName']=users.screen_name
+      userInfo['description']=users.description
+      userInfo['pageLink']='www.twitter.com/'+users.screen_name
+      userInfo['profileImage']=users.profile_image_url
       callback(userInfo)
     }
     else{
-      console.log(error)
+      console.log("GetUserInfoError: "+error)
     }
   })
 }

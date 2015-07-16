@@ -5,15 +5,22 @@ var fs = require('fs')
 var async = require('async')
 var builder = require('xmlbuilder')
 var xml2js = require('xml2js')
+var MongoClient = require('mongodb').MongoClient
+var db = require('mongodb').Db
 
+var mongoUrl = 'mongodb://localhost:27017/socialFootprint';
 var resource_agents = null
 var queryName = null
 
 module.exports={
   sendQuery: function(query,callback){
     //query = 'Crippa Francesco'
+    // Cancella i dati 'vecchi'
+    removeCollection()
     runBrokerAgent(query,function(queryResult){
       // MONGODB SAVE RESULTS
+      insertQueryResult(queryResult)
+      // Callback result to userAgent
       callback(queryResult)
     })
   }
@@ -79,4 +86,27 @@ function taskGenerator(resource_agent,callback,finalCallback){
     })
   }
   return callback(null,task)
+}
+
+function insertQueryResult(queryResult){
+  MongoClient.connect(mongoUrl,function(err,db){
+		var collection = db.collection('queryResult')
+		collection.insert(queryResult,
+    	function (err, inserted) {
+          if(err){
+            console.log(err)
+          }
+          else {
+            db.close()
+          }
+    	})
+	})
+}
+
+function removeCollection(){
+  MongoClient.connect(mongoUrl,function(err,db){
+		var collection = db.collection('queryResult')
+    collection.remove()
+    db.close()
+	})
 }

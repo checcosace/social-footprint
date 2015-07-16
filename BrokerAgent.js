@@ -3,14 +3,23 @@ var app = express()
 var url = require('url')
 var fs = require('fs')
 var async = require('async')
+// Write XML
 var builder = require('xmlbuilder')
+// Read XML
 var xml2js = require('xml2js')
+// MongoDB
 var MongoClient = require('mongodb').MongoClient
 var db = require('mongodb').Db
+// Run Python script
+var spawn = require("child_process").spawn
+var process = spawn('python',["./ReasoningEngine.py"])
+
+
 
 var mongoUrl = 'mongodb://localhost:27017/socialFootprint';
 var resource_agents = null
 var queryName = null
+var numberUserAgent = 0
 
 module.exports={
   sendQuery: function(query,callback){
@@ -19,7 +28,7 @@ module.exports={
     removeCollection()
     runBrokerAgent(query,function(queryResult){
       // MONGODB SAVE RESULTS
-      insertQueryResult(queryResult)
+      insertQueryResult(queryResult,callback)
       // Callback result to userAgent
       callback(queryResult)
     })
@@ -58,6 +67,8 @@ function loadXMLDoc(finalCallback) {
       var parser = new xml2js.Parser();
       parser.parseString(fileData.substring(0, fileData.length), function (err, result) {
         var resource_agents = result['resource_agents']['resource_agent']
+        numberUserAgent = resource_agents.length
+        console.log("NUMBERUSERAGENT "+numberUserAgent)
         var tasks = []
         console.log('Agent\'s tasks generation')
         tasks = resourceAgentsTaskGeneration(resource_agents,
@@ -88,7 +99,7 @@ function taskGenerator(resource_agent,callback,finalCallback){
   return callback(null,task)
 }
 
-function insertQueryResult(queryResult){
+function insertQueryResult(queryResult,callback){
   MongoClient.connect(mongoUrl,function(err,db){
 		var collection = db.collection('queryResult')
 		collection.insert(queryResult,
@@ -97,6 +108,7 @@ function insertQueryResult(queryResult){
             console.log(err)
           }
           else {
+            runReasoningEngine(callback)
             db.close()
           }
     	})
@@ -104,9 +116,37 @@ function insertQueryResult(queryResult){
 }
 
 function removeCollection(){
+
   MongoClient.connect(mongoUrl,function(err,db){
 		var collection = db.collection('queryResult')
     collection.remove()
     db.close()
+	})
+}
+
+function runReasoningEngine(callback){
+  console.log("TRYING TO CALL REASONING ENGINE")
+  MongoClient.connect(mongoUrl,function(err,db){
+		var collection = db.collection('queryResult')
+    collection.count({},function(error,collectionSize){
+      if(error){
+        console.log(error)
+      }
+      else{
+        if(collectionSize==numberUserAgent){
+          //CALLPy
+          console.log("CALLING REASONING ENGINE")
+          var process = spawn('python',["./ReasoningEngine.py"])
+          process.stdout.on('data', function (data){
+            console.log(data.toString())
+            //callback(data)
+          })
+        }
+        else{
+          console.log("WAIT PLEASE...")
+        }
+      }
+    db.close()
+    })
 	})
 }

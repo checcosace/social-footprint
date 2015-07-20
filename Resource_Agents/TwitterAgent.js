@@ -86,7 +86,13 @@ var getUserData = function(id,callback){
         userInfo['pageLink']='www.twitter.com/'+tweets[0].user.screen_name
         userInfo['profileImage']=tweets[0].user.profile_image_url
         for (index in tweets){
-          userInfo['tweets'].push(tweets[index].text)
+          if (tweets[index].retweeted){
+            userInfo['tweets'].push(tweets[index].retweeted_status.text)
+          }
+          else{
+            userInfo['tweets'].push(tweets[index].text)
+          }
+
         }
         //console.log(userInfo)
         return callback(null,userInfo)

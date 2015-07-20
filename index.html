@@ -29,7 +29,7 @@
     <div id="leftContent" class="pageBarLeft" ng-controller="FirstSourceController">
       <h1> {{source}} </h1>
       <div class="list-group" ng-repeat="user in queryResult track by $index">
-          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> </h4>
+          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> {{user.pageLink}} </h4>
           <a ng-href="{{user.profileImage}}"><img ng-src="{{user.profileImage}}"></a>
           <p class="list-group-item-text" >{{user.description}}</p>
       </div>
@@ -39,7 +39,7 @@
     <div id="rightContent" class="pageBarRight" ng-controller="SecondSourceController">
       <h1> {{source}} </h1>
       <div class="list-group" ng-repeat="user in queryResult track by $index">
-          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> </h4>
+          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> {{user.pageLink}}</h4>
           <a ng-href="{{user.profileImage}}"><img ng-src="{{user.profileImage}}"></a>
           <p class="list-group-item-text" >{{user.description}}</p>
       </div>

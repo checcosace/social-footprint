@@ -13,12 +13,15 @@ def run():
     for res in queryResult:
         if res['source']=='Twitter':
             twitterData = analyseTwitterData(res['results'])
-            print twitterData
+            # print twitterData
         else:
             if res['source']=='Facebook':
-                facebookData = analyseFacebookData(res)
+                facebookData = analyseFacebookData(res['results'])
+                # print facebookData
             else:
                 print('Error! Data Source Unknown')
+    calculateDistances(twitterData,facebookData)
+
 
 def getDataFromDB():
     client = mongodb.MongoClient('mongodb://localhost:27017/')
@@ -42,6 +45,20 @@ def analyseTwitterData(twitterData):
         user['freqDescTable'] = createFreqTable(user,stop,tokenizer,'description','freqDescTable')
     return removeIrrelevantData(twitterData)
 
+def analyseFacebookData(facebookData):
+    for user in facebookData:
+        user['freqArgTable'] = None
+        user['freqDescTable'] = None
+        stop = stopwords.words('italian') + stopwords.words('english')
+    	tokenizer = RegexpTokenizer(r'\w+')
+        irrelevantKeys = ['userName','profileImage','description','pageLink','freqArgTable','freqDescTable']
+        for key in user.keys():
+            if (key not in irrelevantKeys):
+                user['freqArgTable'] = createFreqTable(user,stop,tokenizer,key,'freqArgTable') #potrei creare table dedicate x argomento (tramite la chiave
+        user['freqDescTable'] = createFreqTable(user,stop,tokenizer,'description','freqDescTable')
+    return removeIrrelevantData(facebookData)
+
+
 def createFreqTable(user,stop,tokenizer,property,table):
     tokens = tokenizeSentences(user,stop,tokenizer,property)
     if len(tokens)!=0:
@@ -59,27 +76,11 @@ def createFreqTable(user,stop,tokenizer,property,table):
                     user[table] = np.vstack((user[table],newToken))
             else:
                 user[table]= np.array([token,1])
+    if (user[table]==None):
+        return []
+    if (not isinstance(user[table][0],np.ndarray)):
+        user[table] = [user[table]]
     return user[table]
-
-def createFreqDescTable(user,stop,tokenizer):
-    user['description']=[user['description']]
-    tokens = tokenizeSentences(user,stop,tokenizer,'description')
-    if len(tokens)!=0:
-        for token in tokens:
-            if user['freqArgTable']!=None:
-                index = 0
-                notFound = True
-                while index < len(user['freqArgTable']) and  notFound:
-                    if token == user['freqArgTable'][index][0]:
-                        user['freqArgTable'][index][1] = int(user['freqArgTable'][index][1]) + 1
-                        notFound = False
-                    index = index+1
-                if notFound==True:
-                    newToken = np.array([token,1])
-                    user['freqArgTable'] = np.vstack((user['freqArgTable'],newToken))
-            else:
-                user['freqArgTable']= np.array([token,1])
-    return user['freqDescTable']
 
 def tokenizeSentences(user,stop,tokenizer,property):
     if (property in user):
@@ -91,13 +92,16 @@ def tokenizeSentences(user,stop,tokenizer,property):
             else:
                 user[property] = tokenizer.tokenize(user[property][0])
                 tokens = [word for word in user[property] if word not in stop]
+            #print tokens
             return tokens
+        else:
+            return []
     else:
         #user['tweets']=None
         return []
 
-def removeIrrelevantData(twitterData):
-    for user in twitterData:
+def removeIrrelevantData(data):
+    for user in data:
         if(user['freqArgTable']!=None):
             user['freqArgTable'] = sorted(user['freqArgTable'], key=lambda x: int(x[1]), reverse=True)
             limit = len(user['freqArgTable'])
@@ -111,9 +115,61 @@ def removeIrrelevantData(twitterData):
                     # print post
                 index += 1
             #print user['freqArgTable']
-    return twitterData
+    return data
 
-#def analyseTwitterData(data):
+def calculateDistances(twitterData,facebookData):
+    results = []
+    for twitterProfile in twitterData:
+        profileDistances = {twitterProfile['nickName']:[]}
+        for facebookProfile in facebookData:
+            argDistance = calculateDataDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+            descDistance = calculateDataDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+            profileDistance = argDistance + descDistance
+            profileDistances[twitterProfile['nickName']].append([facebookProfile['pageLink'],profileDistance])
+        results.append(profileDistances)
+
+    for tw in results:
+        tw[tw.keys()[0]] = sorted(tw[tw.keys()[0]],key=lambda x: x[1],reverse=True)
+        print tw
+        print
+def calculateDataDistance(table1,table2):
+    unionSize = 0
+    intersectionSize = 0
+
+    if (table1!=None and table2!=None):
+        if(len(table1)!=0 and len(table2)!=0):
+            appTable = []
+            for el in table1:
+                appTable.append([el[0]]*int(el[1]))
+            table1 = sum(appTable,[])
+            appTable = []
+            for el in table2:
+                appTable.append([el[0]]*int(el[1]))
+            table2 = sum(appTable,[])
+            # if (not isinstance(table1[0],np.ndarray)):
+            #     # print table1
+            #     table1 = [table1]
+            # if (not isinstance(table2[0],np.ndarray)):
+            #     # print table2
+            #     table2 = [table2]
+            # print '-------------------------------------------------------------'
+            for word1 in table1:
+                for word2 in table2:
+                    if (word1.find(word2)!=-1 or word2.find(word1)!=-1):
+                        intersectionSize += 1
+                        break
+            unionSize = len(table1)+len(table2)
+            #unionSize = float(unionSize)/len(table1)
+            # print
+            # print unionSize
+            # print intersectionSize
+            # print float(intersectionSize)/float(unionSize)
+            # print '-------------------------------------------------------------'
+            return float(intersectionSize)/float(unionSize)
+        else:
+            return 0
+    else:
+        return 0
 
 
 

@@ -136,10 +136,26 @@ function runReasoningEngine(callback){
         if(collectionSize==numberUserAgent){
           //CALLPy
           console.log("CALLING REASONING ENGINE")
+          res = ""
           var process = spawn('python',["./ReasoningEngine.py"])
           process.stdout.on('data', function (data){
-            console.log(data.toString())
-            //callback(data)
+            // console.log("BROKERAGENT: "+data.toString())
+            res = res+data.toString('ascii')
+            // console.log("-----------------------------------------------------------")
+            // console.log(res)
+            // console.log((res[res.length-1]=='?' && res[res.length-2]==']'))
+            // console.log(res[res.length-1])
+            // console.log(res[res.length-2])
+            // console.log("-----------------------------------------------------------")
+            if(res[res.length-2]=='?' && res[res.length-3]==']'){
+              console.log("CALLING PARSER ")
+              parseJSONdata(res.substr(0,res.length-2),function(parsedData){
+                console.log("PARSEDDATA: "+parsedData)
+                console.log("BrokerAgent Callbacking Distances")
+                callback(parsedData)
+              })
+            }
+            // callback(data)
           })
         }
         else{
@@ -149,4 +165,25 @@ function runReasoningEngine(callback){
     db.close()
     })
 	})
+}
+
+
+function parseJSONdata(JSONString,callback){
+  parsedData = ""
+  for (char in JSONString){
+    if(JSONString[char]=="\'"){
+      parsedData=parsedData+"\""
+    }
+    else{
+      parsedData=parsedData+JSONString[char]
+    }
+    if(char==JSONString.length-1){
+      console.log("-----------------------------------------------------------")
+      console.log(char)
+      console.log(JSONString.length-1)
+      console.log("-----------------------------------------------------------")
+      callback(parsedData)
+    }
+  }
+
 }

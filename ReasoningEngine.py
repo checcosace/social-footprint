@@ -5,7 +5,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 
 def sendResultToServer(result):
-    print("Hi Node, I'm Python, nice to meet U") #put final results into this print
+    print(str(result)+'?') #put final results into this print
     sys.stdout.flush()
 
 def run():
@@ -20,7 +20,10 @@ def run():
                 # print facebookData
             else:
                 print('Error! Data Source Unknown')
-    calculateDistances(twitterData,facebookData)
+    finalResults = calculateDistances(twitterData,facebookData)
+    matchPercentage = calculateMatchPercentage(finalResults)
+    sendResultToServer(matchPercentage)
+    # sendResultToServer(finalResults)
 
 
 def getDataFromDB():
@@ -92,7 +95,7 @@ def tokenizeSentences(user,stop,tokenizer,property):
             else:
                 user[property] = tokenizer.tokenize(user[property][0])
                 tokens = [word for word in user[property] if word not in stop]
-            #print tokens
+            # print tokens
             return tokens
         else:
             return []
@@ -120,19 +123,22 @@ def removeIrrelevantData(data):
 def calculateDistances(twitterData,facebookData):
     results = []
     for twitterProfile in twitterData:
-        profileDistances = {twitterProfile['nickName']:[]}
+        profileDistances = {str(twitterProfile['nickName']):[]}
         for facebookProfile in facebookData:
-            argDistance = calculateDataDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
-            descDistance = calculateDataDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+            # argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+            # descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+            argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+            descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
             profileDistance = argDistance + descDistance
-            profileDistances[twitterProfile['nickName']].append([facebookProfile['pageLink'],profileDistance])
+            profileDistances[str(twitterProfile['nickName'])].append([str(facebookProfile['pageLink']),profileDistance])
         results.append(profileDistances)
-
     for tw in results:
         tw[tw.keys()[0]] = sorted(tw[tw.keys()[0]],key=lambda x: x[1],reverse=True)
-        print tw
-        print
-def calculateDataDistance(table1,table2):
+    return results
+        # print tw
+        # print
+
+def calculateExtendedJaccardDistance(table1,table2):
     unionSize = 0
     intersectionSize = 0
 
@@ -159,18 +165,46 @@ def calculateDataDistance(table1,table2):
                         intersectionSize += 1
                         break
             unionSize = len(table1)+len(table2)
-            #unionSize = float(unionSize)/len(table1)
-            # print
-            # print unionSize
-            # print intersectionSize
-            # print float(intersectionSize)/float(unionSize)
-            # print '-------------------------------------------------------------'
             return float(intersectionSize)/float(unionSize)
         else:
             return 0
     else:
         return 0
 
+def calculateJaccardDistance(table1,table2):
+    if (table1!=None and table2!=None):
+        if(len(table1)!=0 and len(table2)!=0):
+            appTable = []
+            for el in table1:
+                appTable.append([el[0]]*int(el[1]))
+            table1 = sum(appTable,[])
+            appTable = []
+            for el in table2:
+                appTable.append([el[0]]*int(el[1]))
+            table2 = sum(appTable,[])
+
+            unionSize = len(list(set(table1) | set(table2)))
+            intersectionSize = len(list(set(table1) & set(table2)))
+            return float(intersectionSize)/float(unionSize)
+        else:
+            return 0
+    else:
+        return 0
+
+def calculateMatchPercentage(finalResults):
+    cumulates = []
+    for res in finalResults:
+        cumulate = 0
+        for measures in res[res.keys()[0]]:
+            cumulate += measures[1]
+        cumulates.append(cumulate)
+    index = 0
+    for res in range(len(finalResults)):
+        if cumulates[index]!=0:
+            for measures in range(len(finalResults[res][finalResults[res].keys()[0]])):
+                finalResults[res][finalResults[res].keys()[0]][measures][1] = float(finalResults[res][finalResults[res].keys()[0]][measures][1])/float(cumulates[index])
+        index += 1
+    return finalResults
 
 
 if __name__ == "__main__":

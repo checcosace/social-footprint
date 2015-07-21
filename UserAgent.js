@@ -47,7 +47,8 @@ app.get('/sendQuery',function(req,res){
     //res.writeHead(200, {'Content-Type': 'text/plain'})
     res.write(JSON.stringify(queryResult))
     resCounter = resCounter+1
-    if (resCounter==2){ // mettere == 3 quando si aggiungerà lo script python
+    if (resCounter==3){ // mettere == 3 quando si aggiungerà lo script python
+      // console.log(JSON.stringify(queryResult,null,4))
       res.end()
     }
     //res.end(JSON.stringify(queryResult))

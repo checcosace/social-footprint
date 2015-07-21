@@ -32,7 +32,7 @@ body{
   min-height : 900px;
 }
 .list-group{
-  height: 120px;
+  min-height: 120px;
   border: solid;
   border-width: thin;
   border-radius: 10px;
@@ -54,4 +54,16 @@ body{
 .list-group p {
   padding-top: 5px;
   padding-left: 5px;
+}
+
+.active {
+  display: inline-block;
+}
+
+.hidden {
+  display: none;
+}
+
+.green {
+  color: #009900;
 }

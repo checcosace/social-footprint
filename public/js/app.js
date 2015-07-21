@@ -25,6 +25,9 @@ app.controller('SecondSourceController', function($scope) {
 
 })
 
-// app.controller('FinalResultsController', function($scope) {
-//
-// })
+app.controller('FinalResultsController', function($scope) {
+  $scope.setResults = function(results){
+    $scope.title="MatchingPercentage"
+    $scope.finalResults = results
+  }
+})

@@ -48,6 +48,20 @@ function sendQuery(query) {
                   scope.setResults(result.results)
                 })
             }
+            else{
+              if(resCounter==3){
+                scope = angular.element('.pageContent').scope()
+                scope.$apply(
+                  function(){
+                    console.log("Distances")
+                    console.log(result)
+                    result = JSON.parse(result)
+                    console.log(result)
+                    scope.setResults(result)
+                  }
+                )
+              }
+            }
           }
         }
       resCounter++

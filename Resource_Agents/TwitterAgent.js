@@ -2,8 +2,8 @@ var Twitter = require('twitter');
 var async = require('async')
 
 var client = new Twitter({
-  consumer_key: 'kUkSj2JViYQzcE4Bqsbq6Myjg',
-  consumer_secret: 'SEEnhtKc04yATvPVUsO7TDOqh4GZRRBdCRcYnPD1pLbu5aPj1M',
+  consumer_key: 'fP9Qx8qrgN2Ub9SpU8gmskOWf',
+  consumer_secret: '8MtKMDLTfwiQiTN51REFurgC14PBI23giTzwdJtPvBI6ahtGZI',
   access_token_key: '1390496706-UmGd3ICa4zJqfBKzPGNHgZiFnxlozMyZcIqj3lj',
   access_token_secret: '6mX5CZM7Gt8rPGSkyQTxMlUVA1dfzScjwUUC4HAALutII'
 })
@@ -68,7 +68,7 @@ var getUsersList = function(query,callback){
       return callback(null,userList)
     }
     else{
-      console.log(error)
+      console.log("SEARCH ERROR: "+JSON.stringify(error,null,2))
     }
   })
 }
@@ -86,13 +86,14 @@ var getUserData = function(id,callback){
         userInfo['pageLink']='www.twitter.com/'+tweets[0].user.screen_name
         userInfo['profileImage']=tweets[0].user.profile_image_url
         for (index in tweets){
-          if (tweets[index].retweeted){
-            userInfo['tweets'].push(tweets[index].retweeted_status.text)
+          if (tweets[index].text!=undefined){
+            if (tweets[index].retweeted && tweets[index].retweeted_status!=undefined){
+                userInfo['tweets'].push(tweets[index].retweeted_status.text)
+            }
+            else{
+              userInfo['tweets'].push(tweets[index].text)
+            }
           }
-          else{
-            userInfo['tweets'].push(tweets[index].text)
-          }
-
         }
         //console.log(userInfo)
         return callback(null,userInfo)
@@ -106,7 +107,7 @@ var getUserData = function(id,callback){
       }
     }
     else{
-      console.log(error)
+      console.log("SINGLE USER ERROR: "+JSON.stringify(error))
     }
   })
 }
@@ -126,7 +127,7 @@ function getUserInformation(id,callback){
       callback(userInfo)
     }
     else{
-      console.log("GetUserInfoError: "+error)
+      console.log("GetUserInfoError: "+JSON.stringify(error))
     }
   })
 }

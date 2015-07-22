@@ -13,7 +13,7 @@ def run():
     for res in queryResult:
         if res['source']=='Twitter':
             twitterData = analyseTwitterData(res['results'])
-            # print twitterData
+            #print twitterData
         else:
             if res['source']=='Facebook':
                 facebookData = analyseFacebookData(res['results'])
@@ -41,7 +41,9 @@ def analyseTwitterData(twitterData):
     for user in twitterData:
         user['freqArgTable'] = None
         user['freqDescTable'] = None
-        stop = stopwords.words('italian') + stopwords.words('english')
+        moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
+        moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'@RT']
+        stop = stopwords.words('italian') + stopwords.words('english') + moreStopwords
     	tokenizer = RegexpTokenizer(r'\w+')
         user['freqArgTable'] = createFreqTable(user,stop,tokenizer,'tweets','freqArgTable')
         user['description'] = [user['description']]
@@ -91,7 +93,7 @@ def tokenizeSentences(user,stop,tokenizer,property):
             if(len(user[property])>1):
                 user[property] = map(lambda sent: tokenizer.tokenize(sent),user[property])
                 # Remove stopwords
-                tokens = [word for tweet in user[property] for word in tweet if word not in stop]
+                tokens = [word for tweet in user[property] for word in tweet if word.lower() not in stop]
             else:
                 user[property] = tokenizer.tokenize(user[property][0])
                 tokens = [word for word in user[property] if word not in stop]
@@ -130,7 +132,9 @@ def calculateDistances(twitterData,facebookData):
             argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
             descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
             profileDistance = argDistance + descDistance
-            profileDistances[str(twitterProfile['nickName'])].append([str(facebookProfile['pageLink']),profileDistance])
+            similarities = getSimilarities(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+            np.hstack((similarities,getSimilarities(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])))
+            profileDistances[str(twitterProfile['nickName'])].append([str(facebookProfile['pageLink']),profileDistance,similarities])
         results.append(profileDistances)
     for tw in results:
         tw[tw.keys()[0]] = sorted(tw[tw.keys()[0]],key=lambda x: x[1],reverse=True)
@@ -190,6 +194,27 @@ def calculateJaccardDistance(table1,table2):
             return 0
     else:
         return 0
+
+def getSimilarities(table1,table2):
+    if (table1!=None and table2!=None):
+        if(len(table1)!=0 and len(table2)!=0):
+            appTable = []
+            for el in table1:
+                appTable.append([el[0]]*int(el[1]))
+            table1 = sum(appTable,[])
+            appTable = []
+            for el in table2:
+                appTable.append([el[0]]*int(el[1]))
+            table2 = sum(appTable,[])
+
+            similarities = list(set(table1) & set(table2))
+            for index in range(len(similarities)):
+                similarities[index] = str(similarities[index])
+            return similarities
+        else:
+            return []
+    else:
+        return []
 
 def calculateMatchPercentage(finalResults):
     cumulates = []

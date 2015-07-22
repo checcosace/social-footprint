@@ -44,6 +44,9 @@ function sendQuery(query) {
                   console.log(result)
                   console.log(result.source)
                   spinner2.stop()
+                  var target3 = document.getElementById("centralContent")
+                  spinner3 = new Spinner(opts).spin()
+                  target3.appendChild(spinner3.el)
                   scope.setSource(result.source)
                   scope.setResults(result.results)
                 })
@@ -53,6 +56,7 @@ function sendQuery(query) {
                 scope = angular.element('.pageContent').scope()
                 scope.$apply(
                   function(){
+                    spinner3.stop()
                     console.log("Distances")
                     console.log(result)
                     result = JSON.parse(result)

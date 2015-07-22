@@ -29,7 +29,7 @@
     <div id="leftContent" class="pageBarLeft" ng-controller="FirstSourceController">
       <h1> {{source}} </h1>
       <div class="list-group" ng-repeat="user in queryResult track by $index">
-          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> {{user.pageLink}} </h4>
+          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> <br> {{user.pageLink | limitTo : user.pageLink.length : user.pageLink.indexOf("/")+1}} </h4>
           <a ng-href="{{user.profileImage}}"><img ng-src="{{user.profileImage}}"></a>
           <p class="list-group-item-text" >{{user.description}}</p>
       </div>
@@ -39,14 +39,20 @@
       <div class="list-group" ng-repeat="res in finalResults track by $index">
         <div ng-repeat="(key,val) in res">
           <h1> {{key}} </h1>
-          <p class="list-group-item-text" ng-repeat="mes in val" ng-class="mes[1] == 0 ? 'hidden'  : 'active green'">{{mes[0]}} <br> Match percentage:  {{mes[1]*100 | number:0}}%</p>
+          <div ng-repeat="mes in val">
+            <p class="list-group-item-text" ng-class="mes[1] == 0 ? 'hidden'  : 'active green'">{{mes[0]}} <br> Match percentage:  {{mes[1]*100 | number:0}}% <br>
+              <br>
+              SIMILARITIES:
+            </p>
+            <p ng-repeat="sim in mes[2]"> {{sim}} </p>
+          </div>
         </div>
       </div>
     </div>
     <div id="rightContent" class="pageBarRight" ng-controller="SecondSourceController">
       <h1> {{source}} </h1>
       <div class="list-group" ng-repeat="user in queryResult track by $index">
-          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> {{user.pageLink}}</h4>
+          <h4 class="list-group-item-heading"> <a ng-href="{{user.pageLink}}"> {{user.userName}} </a> <br> {{user.pageLink | limitTo : user.pageLink.length : user.pageLink.indexOf("m/")+2}}</h4>
           <a ng-href="{{user.profileImage}}"><img ng-src="{{user.profileImage}}"></a>
           <p class="list-group-item-text">{{user.description}}</p>
       </div>

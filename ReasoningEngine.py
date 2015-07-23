@@ -41,9 +41,10 @@ def analyseTwitterData(twitterData):
     for user in twitterData:
         user['freqArgTable'] = None
         user['freqDescTable'] = None
+        decimalStopwords = [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',]
         moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
         moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'@RT']
-        stop = stopwords.words('italian') + stopwords.words('english') + moreStopwords
+        stop = stopwords.words('italian') + stopwords.words('english') + moreStopwords + decimalStopwords
     	tokenizer = RegexpTokenizer(r'\w+')
         user['freqArgTable'] = createFreqTable(user,stop,tokenizer,'tweets','freqArgTable')
         user['description'] = [user['description']]
@@ -209,7 +210,7 @@ def getSimilarities(table1,table2):
 
             similarities = list(set(table1) & set(table2))
             for index in range(len(similarities)):
-                similarities[index] = str(similarities[index])
+                similarities[index] = similarities[index].encode('utf8')
             return similarities
         else:
             return []

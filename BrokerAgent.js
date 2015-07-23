@@ -171,17 +171,20 @@ function runReasoningEngine(callback){
 function parseJSONdata(JSONString,callback){
   parsedData = ""
   for (char in JSONString){
-    if(JSONString[char]=="\'"){
+    if(JSONString[char] == "\'"){
       parsedData=parsedData+"\""
     }
     else{
+      if(JSONString[char] == "\\"){
+        parsedData=parsedData+"\\"
+      }
       parsedData=parsedData+JSONString[char]
     }
     if(char==JSONString.length-1){
-      console.log("-----------------------------------------------------------")
-      console.log(char)
-      console.log(JSONString.length-1)
-      console.log("-----------------------------------------------------------")
+      // console.log("-----------------------------------------------------------")
+      // console.log(char)
+      // console.log(JSONString.length-1)
+      // console.log("-----------------------------------------------------------")
       callback(parsedData)
     }
   }

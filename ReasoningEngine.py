@@ -55,6 +55,9 @@ def analyseFacebookData(facebookData):
     for user in facebookData:
         user['freqArgTable'] = None
         user['freqDescTable'] = None
+        decimalStopwords = [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',]
+        moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
+        moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'@RT']
         stop = stopwords.words('italian') + stopwords.words('english')
     	tokenizer = RegexpTokenizer(r'\w+')
         irrelevantKeys = ['userName','profileImage','description','pageLink','freqArgTable','freqDescTable']
@@ -132,7 +135,7 @@ def calculateDistances(twitterData,facebookData):
             # descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
             argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
             descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
-            profileDistance = argDistance + descDistance
+            profileDistance = (argDistance + descDistance)/2
             similarities = getSimilarities(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
             np.hstack((similarities,getSimilarities(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])))
             profileDistances[str(twitterProfile['nickName'])].append([str(facebookProfile['pageLink']),profileDistance,similarities])

@@ -68,3 +68,19 @@ body{
 .green {
   color: #009900;
 }
+.centered {
+  text-align: center;
+}
+#digitalFootprint {
+  width: auto;
+}
+
+#digitalFootprint div {
+    /*float: left;*/
+    width: auto;
+    text-align: center;
+}
+
+.clear {
+  clear: both;
+}

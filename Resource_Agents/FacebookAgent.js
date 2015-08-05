@@ -9,6 +9,8 @@ var async = require('async')
 var profilesInfos = []
 var numberCalls=0
 
+
+
 module.exports={
   pullDataFromSource: function (name,callbackMain){
   // inizializza e lancia lo scrape
@@ -169,7 +171,7 @@ function scheduleScraping(profilesInfos,index,callback){
 }
 
 
-function scrapeUser(userInfo){ //SALTA SEMPRE L'ULTIMO UTENTE
+function scrapeUser(userInfo){
   var file = 'singleuser.html'
   var url = userInfo['pageLink']
   xray(url, 'body@html')(function(err,result){
@@ -191,10 +193,20 @@ function scrapeUser(userInfo){ //SALTA SEMPRE L'ULTIMO UTENTE
             var scrape = cheerio.load(interest+"\n")
             var label = scrape('.label .labelContainer').text()
             userInfo[label]=[]
-            scrape('.data a').each(function(index2,item){
-              var value = scrape(this)
-              userInfo[label].push(value.text())
-            })
+            if (label == 'Altro'){
+              scrape('.data span a').each(function(index2,item){
+                var value = scrape(this)
+                userInfo[label].push(value.text())
+              })
+            }
+            else{
+              scrape('.data .mediaPageName').each(function(index2,item){
+                var value = scrape(this)
+                
+                userInfo[label].push(value.text())
+              })
+            }
+
           })
           var regex1 = /<code class="hidden_elem" id="._._."><!-- <div class="timelineLoggedOutSignUp.*">/i
           var regex2 = /data-referrer="pagelet_contact"><\/div><\/div><\/div><\/div><\/div> --><\/code>/i

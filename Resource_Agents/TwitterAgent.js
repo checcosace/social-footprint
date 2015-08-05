@@ -7,7 +7,14 @@ var client = new Twitter({
   access_token_key: '1390496706-UmGd3ICa4zJqfBKzPGNHgZiFnxlozMyZcIqj3lj',
   access_token_secret: '6mX5CZM7Gt8rPGSkyQTxMlUVA1dfzScjwUUC4HAALutII'
 })
-// !!!!!!!!!!!!!!!!!!!!!!!!!MANCA FILTRAGGIO UTENTI !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+// var client = new Twitter({
+//   consumer_key: 'fP9Qx8qrgN2Ub9SpU8gmskOWf',
+//   consumer_secret: '8MtKMDLTfwiQiTN51REFurgC14PBI23giTzwdJtPvBI6ahtGZI'
+// })
+//
+// client.
 
 module.exports={
   pullDataFromSource: function (name,callback){
@@ -26,6 +33,23 @@ module.exports={
         })
     })
   }
+}
+
+function getBearerToken(){
+  var params = {q: query}
+  var userList = []
+  client.get('users/search.json', params, function(error, users, response){
+    if (!error) {
+      for (index in users){
+        userList.push(users[index].id)
+      }
+      console.log('TWITTER Getting users\'s list')
+      return callback(null,userList)
+    }
+    else{
+      console.log("SEARCH ERROR: "+JSON.stringify(error,null,2))
+    }
+  })
 }
 
 // crea query del tipo [nome cognome, cognome nome]

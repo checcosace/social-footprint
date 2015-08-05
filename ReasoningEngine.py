@@ -3,6 +3,7 @@ import numpy as np
 import pymongo as mongodb
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
+from nltk.corpus import wordnet as wn
 
 def sendResultToServer(result):
     print(str(result)+'?') #put final results into this print
@@ -21,9 +22,10 @@ def run():
             else:
                 print('Error! Data Source Unknown')
     finalResults = calculateDistances(twitterData,facebookData)
-    matchPercentage = calculateMatchPercentage(finalResults)
-    sendResultToServer(matchPercentage)
-    # sendResultToServer(finalResults)
+    # matchPercentage = calculateMatchPercentage(finalResults)
+    # print facebookData
+    # sendResultToServer(matchPercentage)
+    sendResultToServer(finalResults)
 
 
 def getDataFromDB():
@@ -38,41 +40,44 @@ def getDataFromDB():
 
 
 def analyseTwitterData(twitterData):
+    decimalStopwords = [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',]
+    moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
+    moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'RT',u'\xec','RT']
+    stop = stopwords.words('italian') + stopwords.words('english') + moreStopwords + decimalStopwords
+    tokenizer = RegexpTokenizer(r'\w+')
     for user in twitterData:
         user['freqArgTable'] = None
         user['freqDescTable'] = None
-        decimalStopwords = [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',]
-        moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
-        moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'@RT']
-        stop = stopwords.words('italian') + stopwords.words('english') + moreStopwords + decimalStopwords
-    	tokenizer = RegexpTokenizer(r'\w+')
         user['freqArgTable'] = createFreqTable(user,stop,tokenizer,'tweets','freqArgTable')
         user['description'] = [user['description']]
         user['freqDescTable'] = createFreqTable(user,stop,tokenizer,'description','freqDescTable')
     return removeIrrelevantData(twitterData)
+    # return twitterData
 
 def analyseFacebookData(facebookData):
+    decimalStopwords = [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',]
+    moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
+    moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'@RT']
+    stop = stopwords.words('italian') + stopwords.words('english')
+    tokenizer = RegexpTokenizer(r'\w+')
+    irrelevantKeys = ['userName','profileImage','description','pageLink','freqArgTable','freqDescTable']
     for user in facebookData:
         user['freqArgTable'] = None
         user['freqDescTable'] = None
-        decimalStopwords = [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',]
-        moreStopwords = [u'a',u'b',u'c',u'd',u'e',u'f',u'g',u'h',u'i',u'l',u'n',u'm',u'o',u'p',u'q',u'r',u's',u'u',u'v']
-        moreStopwords = moreStopwords + [u'z',u'http',u'co',u'com',u'@RT']
-        stop = stopwords.words('italian') + stopwords.words('english')
-    	tokenizer = RegexpTokenizer(r'\w+')
-        irrelevantKeys = ['userName','profileImage','description','pageLink','freqArgTable','freqDescTable']
         for key in user.keys():
             if (key not in irrelevantKeys):
-                user['freqArgTable'] = createFreqTable(user,stop,tokenizer,key,'freqArgTable') #potrei creare table dedicate x argomento (tramite la chiave
+                user['freqArgTable'] = createFreqTable(user,stop,tokenizer,key,'freqArgTable')
         user['freqDescTable'] = createFreqTable(user,stop,tokenizer,'description','freqDescTable')
     return removeIrrelevantData(facebookData)
+    # return facebookData
 
 
 def createFreqTable(user,stop,tokenizer,property,table):
     tokens = tokenizeSentences(user,stop,tokenizer,property)
     if len(tokens)!=0:
+        # tokens = tokensExpansion(tokens)
         for token in tokens:
-            if user[table]!=None:
+            if user[table]!=None and len(user[table])!=0:
                 index = 0
                 notFound = True
                 while index < len(user[table]) and  notFound:
@@ -85,7 +90,7 @@ def createFreqTable(user,stop,tokenizer,property,table):
                     user[table] = np.vstack((user[table],newToken))
             else:
                 user[table]= np.array([token,1])
-    if (user[table]==None):
+    if (user[table]==None or len(user[table])==0):
         return []
     if (not isinstance(user[table][0],np.ndarray)):
         user[table] = [user[table]]
@@ -133,12 +138,14 @@ def calculateDistances(twitterData,facebookData):
         for facebookProfile in facebookData:
             # argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
             # descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
-            argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
-            descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
-            profileDistance = (argDistance + descDistance)/2
-            similarities = getSimilarities(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
-            np.hstack((similarities,getSimilarities(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])))
-            profileDistances[str(twitterProfile['nickName'])].append([str(facebookProfile['pageLink']),profileDistance,similarities])
+            argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+            descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+            hybridDist1 = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
+            hybridDist2 = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqArgTable'])
+            profileDistance = (argDistance*2 + descDistance*4 + hybridDist1 + hybridDist2)/8
+            # similarities = getSimilarities(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+            # np.hstack((similarities,getSimilarities(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])))
+            profileDistances[str(twitterProfile['nickName'])].append([str(facebookProfile['pageLink']),profileDistance])#,similarities
         results.append(profileDistances)
     for tw in results:
         tw[tw.keys()[0]] = sorted(tw[tw.keys()[0]],key=lambda x: x[1],reverse=True)
@@ -168,11 +175,34 @@ def calculateExtendedJaccardDistance(table1,table2):
             #     table2 = [table2]
             # print '-------------------------------------------------------------'
             for word1 in table1:
-                for word2 in table2:
+                found = False
+                index = 0
+                while(index in range(len(table2)) and not found):
+                    word2 = table2[index]
+                    index += 1
                     if (word1.find(word2)!=-1 or word2.find(word1)!=-1):
                         intersectionSize += 1
-                        break
+
+                        found = True
+                    else:
+                        syns1 = wn.synsets(word1,lang='ita')
+                        syns2 = wn.synsets(word2,lang='ita')
+                        if len(list(set(table1) & set(table2))) > 0:
+                            intersectionSize += 1
+                            found = True
+                        # synIndex = 0
+                        # while (synIndex in range(len(syns1)) and not found):
+                        #     syn = syns1[synIndex]
+                        #     synIndex += 1
+                        #     if syn in syns2:
+                        #         intersectionSize += 1
+                        #         found = True
+            # print 'INTERSEZIONE INSIEMISTICA: '+str(len(list(set(table1) & set(table2))))
+            # print 'INTERSEZIONE Semantica: '+str(intersectionSize)
+            # unionSize = len(list(set(table1) | set(table2)))#
             unionSize = len(table1)+len(table2)
+
+            # print 'UNIONE INSIEMISTICA: '+str(unionSize)
             return float(intersectionSize)/float(unionSize)
         else:
             return 0
@@ -234,6 +264,27 @@ def calculateMatchPercentage(finalResults):
                 finalResults[res][finalResults[res].keys()[0]][measures][1] = float(finalResults[res][finalResults[res].keys()[0]][measures][1])/float(cumulates[index])
         index += 1
     return finalResults
+
+def tokensExpansion(tokens):
+    result = []
+    if len(tokens)!=0:
+        if tokens != None:
+            for token in tokens:
+                synonym = wn.synsets(token,lang='ita')
+                if (len(synonym)!=0 and synonym!=None):
+                        if synonym[0].lemma_names('ita')!=None:
+                            lems = synonym[0].lemmas('ita')
+                            if (len(lems)!=0 and lems!=None):
+                                result.append([lemma.name() for lemma in lems])
+                            else:
+                                result.append([token])
+                        else:
+                            result.append([token])
+                else:
+                    result.append([token])
+            result = sum(result,[])
+            return result
+    return result
 
 
 if __name__ == "__main__":

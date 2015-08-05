@@ -30,4 +30,12 @@ app.controller('FinalResultsController', function($scope) {
     $scope.title="MatchingPercentage"
     $scope.finalResults = results
   }
+
+  $scope.setTwitterData = function(twData){
+    $scope.twitterData = twData
+  }
+
+  $scope.setFacebookData = function(fbData){
+    $scope.facebookData = fbData
+  }
 })

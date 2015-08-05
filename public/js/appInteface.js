@@ -35,6 +35,17 @@ function sendQuery(query) {
                 scope.setSource(result.source)
                 scope.setResults(result.results)
               })
+              scope = angular.element('.pageContent').scope()
+              scope.$apply(
+                function(){
+                  if (result.source == 'Twitter'){
+                    scope.setTwitterData(result.results)
+                  }
+                  else{
+                    scope.setFacebookData(result.results)
+                  }
+                }
+              )
           }
           else {
             if(resCounter==2){
@@ -50,6 +61,17 @@ function sendQuery(query) {
                   scope.setSource(result.source)
                   scope.setResults(result.results)
                 })
+                scope = angular.element('.pageContent').scope()
+                scope.$apply(
+                  function(){
+                    if (result.source == 'Twitter'){
+                      scope.setTwitterData(result.results)
+                    }
+                    else{
+                      scope.setFacebookData(result.results)
+                    }
+                  }
+                )
             }
             else{
               if(resCounter==3){

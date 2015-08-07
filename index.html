@@ -36,9 +36,11 @@
     </div>
     <div id="centralContent" class="pageContent" ng-controller="FinalResultsController">
       <h1> {{title}} </h1>
-      <div class="list-group centered" ng-repeat="res in finalResults track by $index">
+      <div ng-attr-id="" class="list-group centered" ng-repeat="res in finalResults">
         <div ng-repeat="(key,val) in res">
-          <a class="btn btn-primary btn-large">See {{key}} Digital Footprint</a>
+          <a class="btn btn-primary btn-large" ng-click="showDigitalFootprint(finalResults.indexOf(res))">
+            {{key}} Digital Footprint
+          </a>
           <h1> {{key}} </h1>
           <div ng-repeat="mes in val">
             <p class="list-group-item-text" ng-class="mes[1] == 0 ? 'hidden'  : 'active green'">{{mes[0]}} <br> Similarity  {{mes[1]}} <br>
@@ -47,7 +49,7 @@
             </p>
             <!-- <p class="green" ng-repeat="sim in mes[2]"> {{sim}} </p> -->
           </div>
-          <div id="digitalFootprint">
+          <div ng-attr-id="{{'digitalFootprint' + finalResults.indexOf(res)}}" class="hidden">
             <h3> Digital Footprint </h3>
             <div ng-repeat="twProfile in twitterData track by $index">
             {{twProfile['nickName'] == key ? twProfile['description'] : ''}}
@@ -60,7 +62,7 @@
             <div ng-class="twProfile['nickName'] == key ? 'active'  : 'hidden'">
               <h4><b>Tweets</b></h4>
               <!-- {{twProfile['nickName'] == key ? twProfile['tweets'] : ''}} -->
-              <p ng-repeat="t in twProfile['tweets']">{{t}}</p>
+              <p ng-repeat="t in twProfile['tweets'] track by $index">{{t}}</p>
             </div>
             </div>
             <br>
@@ -68,7 +70,7 @@
               <div ng-repeat="(keys,value) in fbProfile" ng-class="fbProfile['pageLink'] == val[0][0] && ['pageLink','description','userName','profileImage'].indexOf(keys) == -1  ? 'active'  : 'hidden'">
                 <h4><b>{{keys}}</b></h4>
                   <!-- {{value}} -->
-                  <p ng-repeat="v in value"> {{v}} </p>
+                  <p ng-repeat="v in value track by $index"> {{v}} </p>
             <!-- {{fbProfile['pageLink'] == val[0][0] ? fbProfile['description'] : ''}} -->
               </div>
             </div>

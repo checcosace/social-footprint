@@ -182,7 +182,6 @@ def calculateExtendedJaccardDistance(table1,table2):
                     index += 1
                     if (word1.find(word2)!=-1 or word2.find(word1)!=-1):
                         intersectionSize += 1
-
                         found = True
                     else:
                         syns1 = wn.synsets(word1,lang='ita')
@@ -190,6 +189,12 @@ def calculateExtendedJaccardDistance(table1,table2):
                         if len(list(set(table1) & set(table2))) > 0:
                             intersectionSize += 1
                             found = True
+                        else:
+                            syns1 = wn.synsets(word1)
+                            syns2 = wn.synsets(word2)
+                            if len(list(set(table1) & set(table2))) > 0:
+                                intersectionSize += 1
+                                found = True
                         # synIndex = 0
                         # while (synIndex in range(len(syns1)) and not found):
                         #     syn = syns1[synIndex]

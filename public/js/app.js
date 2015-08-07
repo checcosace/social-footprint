@@ -38,4 +38,17 @@ app.controller('FinalResultsController', function($scope) {
   $scope.setFacebookData = function(fbData){
     $scope.facebookData = fbData
   }
+
+  $scope.showDigitalFootprint = function(index){
+    if ($('#digitalFootprint'+index).attr('class')=='hidden'){
+      $('#digitalFootprint'+index).removeClass('hidden')
+      $('#digitalFootprint'+index).addClass('active')
+    }
+    else{
+      $('#digitalFootprint'+index).removeClass('active')
+      $('#digitalFootprint'+index).addClass('hidden')
+    }
+    //showDigitalFootprint(index)
+  }
+
 })

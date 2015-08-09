@@ -14,7 +14,7 @@ var numberCalls=0
 module.exports={
   pullDataFromSource: function (name,callbackMain){
     // inizializza e lancia lo scrape
-    //var name = "Crippa Francesco"
+    // var name = "Crippa Francesco"
     console.log("FACEBOOK Agent Started")
     var query = createQuery(name)
     var index=0
@@ -34,6 +34,12 @@ module.exports={
     }
   }
 
+  // module.exports.pullDataFromSource("Carlo-Clericetti",function(res){
+  //   console.log("-----------------------------------------------------------")
+  //   console.log("R I S U L T A T I")
+  //   console.log("-----------------------------------------------------------")
+  //   console.log(res)
+  // })
   // crea una query formattata nella corretta maniera.
   // query è un array di due elementi del tipo:
   // [cognome-nome, nome-cognome]
@@ -47,14 +53,20 @@ module.exports={
 
   // Retunr true if array contains an object with same property
   function contains(array,object,property){
+    // console.log(JSON.stringify(array))
     if (array.length==0){
       return false
     }
     else{
       for (index in array){
-        if (array[index][property]==object[property]){
-          console.log("DELETED DUPLICATE-->"+JSON.stringify(object))
-          return true
+        if (array[index]==null){
+          return false
+        }
+        else{
+          if (array[index][property]==object[property]){
+            console.log("DELETED DUPLICATE-->"+JSON.stringify(object))
+            return true
+          }
         }
       }
       return false
@@ -67,10 +79,16 @@ module.exports={
     url = 'http://www.facebook.com/public/'+query
     xray(url, 'body@html')(function(err,result){
       var regex1 = /<code class="hidden_elem" id="u_._."><!-- <div><div class="mbm detailedsearch_result">/i
-      var regex2 = /<\/div><\/div> --><\/code>/i
+      var regex2 = /<\/a><\/div><\/div> --><\/code>/i
       var regex3 = /<code class="hidden_elem" id="u_._."><!-- <div>/i
       start_index = result.search(regex1) + result.match(regex3)[0].length
       finish_index = result.search(regex2)
+      if (finish_index==-1){
+        var regex2 = /<\/div><\/div> --><\/code>/i
+        finish_index = result.search(regex2)
+      }
+      // console.log(start_index)
+      // console.log(finish_index)
       var file_content = result.substr(start_index,finish_index)
       writeRoughFile(file_content,index,callback)
     })
@@ -99,13 +117,14 @@ module.exports={
     console.log("FACEBOOK Getting users list")
     fs.readFile(file,'utf8',function(err,data){
       if(!err){
-        console.log("NO ERROR "+numberCalls)
         $=cheerio.load(data)
         var counter = $('.detailedsearch_result').length
-        console.log(counter)
+        // console.log("COUNTER "+counter)
         $('.detailedsearch_result').each(function(index,element){
           userInfos = $(this)
           scrape = cheerio.load(userInfos+"\n")
+          // console.log(userInfos+"\n")
+          // console.log(scrape+"")
           var userInfo = {'description':[]}
           var pageLink = scrape('.instant_search_title a')[0].attribs.href
           var userName = scrape('.instant_search_title a').text()
@@ -120,11 +139,11 @@ module.exports={
           if (userInfo['pageLink'].indexOf('/pages/')==-1 && isIn==false){
             profilesInfos.push(userInfo)
           }
-          console.log(index)
-          console.log(counter-1)
+          // console.log(index)
+          // console.log(counter-1)
           if(numberCalls==2 && index==counter-1){
             console.log('FACEBOOK Getting users\'s list')
-            console.log(JSON.stringify(profilesInfos,null,2))
+            // console.log(JSON.stringify(profilesInfos,null,2))
             callback(profilesInfos)
           }
         })
@@ -155,7 +174,7 @@ module.exports={
         profileCounter++
       }
     }
-    console.log("USERLIST: "+JSON.stringify(filteredProfileInfos))
+    // console.log("USERLIST: "+JSON.stringify(filteredProfileInfos))
     return filteredProfileInfos
   }
 
@@ -177,7 +196,7 @@ module.exports={
       else{
         callback(profilesInfos)
       }
-    },3000)
+    },2100)
   }
 
 

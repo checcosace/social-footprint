@@ -131,7 +131,7 @@ var getUserData = function(id,callback){
       }
     }
     else{
-      console.log("SINGLE USER ERROR: "+JSON.stringify(error))
+      console.log("SINGLE USER ERROR: "+error)
     }
   })
 }
@@ -151,7 +151,7 @@ function getUserInformation(id,callback){
       callback(userInfo)
     }
     else{
-      console.log("GetUserInfoError: "+JSON.stringify(error))
+      console.log("GetUserInfoError: "+error)
     }
   })
 }

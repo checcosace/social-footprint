@@ -103,6 +103,7 @@ def createFreqTable(user,stop,tokenizer,property,table):
     if (not isinstance(user[table][0],np.ndarray)):
         user[table] = [user[table]]
     return user[table]
+    # return []
 
 def tokenizeSentences(user,stop,tokenizer,property):
     # print 'TOKENIZING '+property
@@ -151,21 +152,25 @@ def calculateDistances(twitterData,facebookData):
             if (len(twitterProfile['freqArgTable'])==0 or len(facebookProfile['freqArgTable'])==0):
                 argDistance = 0
             else:
-                argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+                # argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+                argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
             # print argDistance
             if (len(twitterProfile['freqDescTable'])==0 or len(facebookProfile['freqDescTable'])==0):
                 descDistance = 0
             else:
-                descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+                # descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+                descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
             # print descDistance
             if (len(twitterProfile['freqArgTable'])==0 or len(facebookProfile['freqDescTable'])==0):
                 hybridDist1 = 0
             else:
-                hybridDist1 = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
+                # hybridDist1 = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
+                hybridDist1 = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
             # print hybridDist1
             if (len(twitterProfile['freqDescTable'])==0 or len(facebookProfile['freqArgTable'])==0):
                 hybridDist2 = 0
             else:
+                # hybridDist2 = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqArgTable'])
                 hybridDist2 = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqArgTable'])
             # print hybridDist2
 
@@ -283,7 +288,9 @@ def calculateJaccardDistance(table1,table2):
             table2 = sum(appTable,[])
 
             unionSize = len(list(set(table1) | set(table2)))
-            intersectionSize = len(list(set(table1) & set(table2)))
+            intersection = list(set(table1) & set(table2))
+            intersectionSize = len(intersection)
+
             return float(intersectionSize)/float(unionSize)
         else:
             return 0

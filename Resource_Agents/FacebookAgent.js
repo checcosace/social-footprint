@@ -199,7 +199,6 @@ module.exports={
     },2100)
   }
 
-
   function scrapeUser(userInfo){
     var file = 'singleuser.html'
     var url = userInfo['pageLink']
@@ -209,6 +208,8 @@ module.exports={
       var regex3 = /<code class="hidden_elem" id="u_._."><!-- /i
       start_index = result.search(regex1) + result.match(regex3)[0].length
       finish_index = result.search(regex2)
+      // console.log(start_index)
+      // console.log(finish_index)
       var file_content = result.substr(start_index,finish_index)
       fs.writeFile(file,file_content,function(err){
         if (err){
@@ -238,9 +239,9 @@ module.exports={
 
             })
             var regex1 = /<code class="hidden_elem" id="._._."><!-- <div class="timelineLoggedOutSignUp.*">/i
-            var regex2 = /data-referrer="pagelet_contact"><\/div><\/div><\/div><\/div><\/div> --><\/code>/i
+            var regex2 = /<\/div><\/div><\/div><\/div> --><\/code>/i
             var regex3 = /<code class="hidden_elem" id="._._."><!--/i
-            var regex4 = /data-referrer="pagelet_contact"><\/div><\/div><\/div><\/div><\/div> -->/i
+            var regex4 = /<\/div><\/div><\/div><\/div> -->/i
             start_index = result.search(regex1) + result.match(regex3)[0].length
             finish_index = result.search(regex2) + result.match(regex4)[0].length
             var file_content = result.substr(start_index,finish_index)

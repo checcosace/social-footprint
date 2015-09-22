@@ -49,8 +49,8 @@ def analyseTwitterData(twitterData):
     # print stop
     tokenizer = RegexpTokenizer(r'\w+')
     for user in twitterData:
-        user['freqArgTable'] = None
-        user['freqDescTable'] = None
+        user['freqArgTable'] = []
+        user['freqDescTable'] = []
         user['freqArgTable'] = createFreqTable(user,stop,tokenizer,'tweets','freqArgTable')
         user['description'] = [user['description']]
         user['freqDescTable'] = createFreqTable(user,stop,tokenizer,'description','freqDescTable')
@@ -68,8 +68,8 @@ def analyseFacebookData(facebookData):
     tokenizer = RegexpTokenizer(r'\w+')
     irrelevantKeys = ['userName','profileImage','description','pageLink','freqArgTable','freqDescTable']
     for user in facebookData:
-        user['freqArgTable'] = None
-        user['freqDescTable'] = None
+        user['freqArgTable'] = []
+        user['freqDescTable'] = []
         for key in user.keys():
             if (key not in irrelevantKeys):
                 user['freqArgTable'] = createFreqTable(user,stop,tokenizer,key,'freqArgTable')
@@ -152,26 +152,26 @@ def calculateDistances(twitterData,facebookData):
             if (len(twitterProfile['freqArgTable'])==0 or len(facebookProfile['freqArgTable'])==0):
                 argDistance = 0
             else:
-                # argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
-                argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+                argDistance = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
+                # argDistance = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqArgTable'])
             # print argDistance
             if (len(twitterProfile['freqDescTable'])==0 or len(facebookProfile['freqDescTable'])==0):
                 descDistance = 0
             else:
-                # descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
-                descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+                descDistance = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
+                # descDistance = calculateJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqDescTable'])
             # print descDistance
             if (len(twitterProfile['freqArgTable'])==0 or len(facebookProfile['freqDescTable'])==0):
                 hybridDist1 = 0
             else:
-                # hybridDist1 = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
-                hybridDist1 = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
+                hybridDist1 = calculateExtendedJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
+                # hybridDist1 = calculateJaccardDistance(twitterProfile['freqArgTable'],facebookProfile['freqDescTable'])
             # print hybridDist1
             if (len(twitterProfile['freqDescTable'])==0 or len(facebookProfile['freqArgTable'])==0):
                 hybridDist2 = 0
             else:
-                # hybridDist2 = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqArgTable'])
                 hybridDist2 = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqArgTable'])
+                # hybridDist2 = calculateExtendedJaccardDistance(twitterProfile['freqDescTable'],facebookProfile['freqArgTable'])
             # print hybridDist2
 
             profileDistance = (argDistance*2 + descDistance*4 + hybridDist1 + hybridDist2)/8

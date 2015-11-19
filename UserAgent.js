@@ -15,7 +15,7 @@ app.get(/^.*-.*(?:\/(?=$))?$/i,function(req,res){
       console.log(queryResult)
       res.write(JSON.stringify(queryResult,null,2))
       resCounter = resCounter+1
-      if (resCounter==2){ // mettere == 3 quando si aggiungerà lo script python
+      if (resCounter==2){
         res.end()
       }
       //res.end(JSON.stringify(queryResult))
